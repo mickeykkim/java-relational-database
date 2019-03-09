@@ -86,5 +86,4 @@ class Record {
       Record program = new Record();
       program.run(args);
    }
-
 }
