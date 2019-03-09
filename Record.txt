@@ -57,26 +57,26 @@ class Record {
       assert(test.getField(1).equals("test2"));
       //out of bounds call
       try { test.getField(2); } 
-      catch (Exception e) { caught = true; }
+      catch (IndexOutOfBoundsException e) { caught = true; }
       assert(caught == true);
       caught = false;
       try { test.getField(-1); } 
-      catch (Exception e) { caught = true; }
+      catch (IndexOutOfBoundsException e) { caught = true; }
       assert(caught == true);
       caught = false;
       test.setField(0, "update1");
       assert(test.getField(0).equals("update1"));
-      assert(test.getField(1).equals("test2"));
       //check nothing is incorrectly pushed down in the list
+      assert(test.getField(1).equals("test2"));
       try { test.getField(2); } 
-      catch (Exception e) { caught = true; }
+      catch (IndexOutOfBoundsException e) { caught = true; }
       assert(caught == true);
       caught = false;
       test.setField(1, "update2");
       assert(test.getField(0).equals("update1"));
       assert(test.getField(1).equals("update2"));
       try { test.getField(2); } 
-      catch (Exception e) { caught = true; }
+      catch (IndexOutOfBoundsException e) { caught = true; }
       assert(caught == true);
       caught = false;
    }
