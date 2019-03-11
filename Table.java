@@ -19,8 +19,10 @@ class Table {
       this.records = new ArrayList<Record>();
    }
 
-   void createTable(String name, String... columns) {
-      Table table = new Table(name);
+   Table(String name, String... columns) {
+      this.name = name;
+      this.columns = new ArrayList<String>();
+      this.records = new ArrayList<Record>();
       setColumnNames(columns);
    }
 
@@ -111,6 +113,10 @@ class Table {
       assert(test0.getColumnName(1).equals("2"));
       assert(test0.getColumnName(2).equals("3"));
       assert(test0.getColumnName(3).equals("4"));
+      Table test1 = new Table("title", "X", "Y", "Z");
+      assert(test1.getColumnName(0).equals("X"));
+      assert(test1.getColumnName(1).equals("Y"));
+      assert(test1.getColumnName(2).equals("Z"));
       //reset System.out
       System.out.flush();
       System.setOut(console);
@@ -118,12 +124,10 @@ class Table {
 
    void testTableManipulation() {
       //redirect System.out
-      /*
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       PrintStream out = new PrintStream(baos);
       PrintStream console = System.out;
       System.setOut(out);
-      */
       //Begin tests
       //checking add records
       Table test1 = new Table();
@@ -180,10 +184,8 @@ class Table {
       assert(caught == true);
       caught = false;
       //reset System.out
-      /*
       System.out.flush();
       System.setOut(console);
-      */
    }
 
    void runTests() {
