@@ -42,8 +42,12 @@ class Table {
       return this.columns.get(idx);
    }
 
-   String getName(){
+   String getName() {
       return this.name;
+   }
+
+   void setName(String name) {
+      this.name = name;
    }
 
    Record select(int rowNum) {
@@ -62,7 +66,7 @@ class Table {
       this.records.add(data);
    }
 
-   boolean checkRecordDataExists(int idx) {
+   private boolean checkRecordDataExists(int idx) {
       if (idx >= this.records.size() || idx < 0) {
          System.out.println("No such record in table.");
          throw new IndexOutOfBoundsException();
@@ -70,7 +74,7 @@ class Table {
       return true;
    }
 
-   boolean checkRecordInputSize(Record data) {
+   private boolean checkRecordInputSize(Record data) {
       if (data.size() != this.columns.size()) {
          System.out.println("Input data does not match table columns.");
          throw new IllegalArgumentException();
@@ -105,6 +109,8 @@ class Table {
       Table test = new Table();
       assert(test.getName().equals("untitled"));
       String testName = "test";
+      test.setName(testName);
+      assert(test.getName().equals(testName));
       Table test0 = new Table(testName);
       assert(test0.getName().equals(testName));
       //checking column validity

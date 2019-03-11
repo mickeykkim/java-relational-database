@@ -1,9 +1,10 @@
 For the first version of Record.java, I implemented the strings as a list. I chose to use a list rather than an array because databases have fields that can be changed often. Thus, a list makes more sense as items can be more efficiently added or deleted. This first version has a simple length query and get/set methods along with their respective helper methods (add and clear lists) with tests.
 
-Code is as follows:
+Current code is as follows:
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.*;
 
 class Record {
    private List<String> row;
@@ -12,27 +13,35 @@ class Record {
       this.row = new ArrayList<>();
    }
 
-   private void add(String input) {
-      this.row.add(input);
+   Record(String... data) {
+      this.row = new ArrayList<>();
+      for (int i = 0; i < data.length; i++) {
+         this.row.add(data[i]);
+      }
    }
 
-   private void clear() {
+   void add(String data) {
+      this.row.add(data);
+   }
+
+   void clear() {
       this.row.clear();
    }
 
-   int length() {
+   int size() {
       return this.row.size();
    }
 
    String getField(int idx) {
-      if (idx >= this.row.size()) {
+      if (idx >= this.row.size() || idx < 0) {
+         System.out.println("No such field in record.");
          throw new IndexOutOfBoundsException();
       }
       return this.row.get(idx);
    }
 
-   void setField(int idx, String input) {
-      this.row.add(idx, input);
+   void setField(int idx, String data) {
+      this.row.add(idx, data);
       this.row.remove(idx + 1);
    }
 
@@ -43,8 +52,10 @@ class Record {
       Record test = new Record();
       test.add("test1");
       test.add("test2");
-      assert(test.length() == 2);
+      assert(test.size() == 2);
       test.clear();
+      Record testArr = new Record("test1", "test2");
+      assert(testArr.size() == 2);
    }
 
    // tests getField(int) setField(int, String)
@@ -56,6 +67,11 @@ class Record {
       assert(test.getField(0).equals("test1"));
       assert(test.getField(1).equals("test2"));
       //out of bounds call
+      //redirect System.out
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      PrintStream out = new PrintStream(baos);
+      PrintStream console = System.out;
+      System.setOut(out);
       try { test.getField(2); } 
       catch (IndexOutOfBoundsException e) { caught = true; }
       assert(caught == true);
@@ -79,15 +95,22 @@ class Record {
       catch (IndexOutOfBoundsException e) { caught = true; }
       assert(caught == true);
       caught = false;
+      Record testArr = new Record("test1", "test2");
+      assert(testArr.size() == 2);
+      assert(testArr.getField(0).equals("test1"));
+      assert(testArr.getField(1).equals("test2"));
+      //reset System.out
+      System.out.flush();
+      System.setOut(console);
    }
 
-   void run(String[] args) {
+   void runTests(String[] args) {
       basicTests();
       getsetTests();
    }
 
    public static void main(String[] args) {
       Record program = new Record();
-      program.run(args);
+      program.runTests(args);
    }
 }
