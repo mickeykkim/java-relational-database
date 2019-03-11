@@ -1,0 +1,9 @@
+
+
+
+   Record(String... data) {
+      this.row = new ArrayList<>();
+      for (int i = 0; i < data.length; i++) {
+         this.row.add(data[i]);
+      }
+   }

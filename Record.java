@@ -8,11 +8,18 @@ class Record {
       this.row = new ArrayList<>();
    }
 
-   private void add(String input) {
-      this.row.add(input);
+   Record(String... data) {
+      this.row = new ArrayList<>();
+      for (int i = 0; i < data.length; i++) {
+         this.row.add(data[i]);
+      }
    }
 
-   private void clear() {
+   void add(String data) {
+      this.row.add(data);
+   }
+
+   void clear() {
       this.row.clear();
    }
 
@@ -21,14 +28,15 @@ class Record {
    }
 
    String getField(int idx) {
-      if (idx >= this.row.size()) {
+      if (idx >= this.row.size() || idx < 0) {
+         System.out.println("No such field in record.");
          throw new IndexOutOfBoundsException();
       }
       return this.row.get(idx);
    }
 
-   void setField(int idx, String input) {
-      this.row.add(idx, input);
+   void setField(int idx, String data) {
+      this.row.add(idx, data);
       this.row.remove(idx + 1);
    }
 
@@ -41,6 +49,8 @@ class Record {
       test.add("test2");
       assert(test.length() == 2);
       test.clear();
+      Record testArr = new Record("test1", "test2");
+      assert(testArr.length() == 2);
    }
 
    // tests getField(int) setField(int, String)
@@ -75,15 +85,19 @@ class Record {
       catch (IndexOutOfBoundsException e) { caught = true; }
       assert(caught == true);
       caught = false;
+      Record testArr = new Record("test1", "test2");
+      assert(testArr.length() == 2);
+      assert(testArr.getField(0).equals("test1"));
+      assert(testArr.getField(1).equals("test2"));
    }
 
-   void run(String[] args) {
+   void runTests(String[] args) {
       basicTests();
       getsetTests();
    }
 
    public static void main(String[] args) {
       Record program = new Record();
-      program.run(args);
+      program.runTests(args);
    }
 }
