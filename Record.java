@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.io.*;
 
 class Record {
    private List<String> row;
@@ -23,7 +24,7 @@ class Record {
       this.row.clear();
    }
 
-   int length() {
+   int size() {
       return this.row.size();
    }
 
@@ -47,10 +48,10 @@ class Record {
       Record test = new Record();
       test.add("test1");
       test.add("test2");
-      assert(test.length() == 2);
+      assert(test.size() == 2);
       test.clear();
       Record testArr = new Record("test1", "test2");
-      assert(testArr.length() == 2);
+      assert(testArr.size() == 2);
    }
 
    // tests getField(int) setField(int, String)
@@ -62,6 +63,11 @@ class Record {
       assert(test.getField(0).equals("test1"));
       assert(test.getField(1).equals("test2"));
       //out of bounds call
+      //redirect System.out
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      PrintStream out = new PrintStream(baos);
+      PrintStream console = System.out;
+      System.setOut(out);
       try { test.getField(2); } 
       catch (IndexOutOfBoundsException e) { caught = true; }
       assert(caught == true);
@@ -86,9 +92,12 @@ class Record {
       assert(caught == true);
       caught = false;
       Record testArr = new Record("test1", "test2");
-      assert(testArr.length() == 2);
+      assert(testArr.size() == 2);
       assert(testArr.getField(0).equals("test1"));
       assert(testArr.getField(1).equals("test2"));
+      //reset System.out
+      System.out.flush();
+      System.setOut(console);
    }
 
    void runTests(String[] args) {

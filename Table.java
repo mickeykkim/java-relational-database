@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.io.*;
 
 class Table {
    private String name;
@@ -8,14 +9,14 @@ class Table {
 
    Table() {
       this.name = "untitled";
-      this.columns = new Arraylist<String>();
-      this.records = new Arraylist<Record>();
+      this.columns = new ArrayList<String>();
+      this.records = new ArrayList<Record>();
    }
 
    Table(String name) {
       this.name = name;
-      this.columns = new Arraylist<String>();
-      this.records = new Arraylist<Record>();
+      this.columns = new ArrayList<String>();
+      this.records = new ArrayList<Record>();
    }
 
    void createTable(String name, String... columns) {
@@ -24,13 +25,17 @@ class Table {
    }
 
    void setColumnNames(String... names) {
-      for (int i = 0; i < names.length; i++) {
-         this.columns.add(columns(i));
+      for (String entry : names) {
+         this.columns.add(entry);
       }
    }
 
+   String getName(){
+      return this.name;
+   }
+
    Record select(int rowNum) {
-      if (rowNum > records.length || rowNum < 0) {
+      if (rowNum > records.size() || rowNum < 0) {
          System.out.println("No such row in record.");
          throw new IndexOutOfBoundsException();
       }
@@ -38,9 +43,9 @@ class Table {
    }
 
    void add(Record data) {
-      if (data.length != columns.length) {
+      if (data.size() != columns.size()) {
          System.out.println("Input data does not match table columns.");
-         throw new NoSuchFieldException();
+         throw new IndexOutOfBoundsException();
       }
       this.records.add(data);
    }
@@ -53,9 +58,9 @@ class Table {
    }
 
    void checkRecordInputSize(Record data) {
-      if (data.length != this.columns.length) {
+      if (data.size() != this.columns.size()) {
          System.out.println("Input data does not match table columns.");
-         throw new NoSuchFieldException();
+         throw new IndexOutOfBoundsException();
       }
    }
 
@@ -72,13 +77,19 @@ class Table {
    }
 
    void update(int idxRecord, int idxField, String data) {
-      this.records.select(idxRecord).setField(idxField, data);
+      select(idxRecord).setField(idxField, data);
    }
 
    //--- testing ---
 
    void testTableCreation() {
-
+      
+      Table test = new Table();
+      assert(test.getName().equals("untitled"));
+      String testName = "test";
+      Table test1 = new Table(testName);
+      assert(test1.getName().equals(testName));
+      
    }
 
    void testTableManipulation() {
