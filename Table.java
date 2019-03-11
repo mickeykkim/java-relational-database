@@ -83,17 +83,31 @@ class Table {
    //--- testing ---
 
    void testTableCreation() {
-      
+      //redirect System.out
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      PrintStream out = new PrintStream(baos);
+      PrintStream console = System.out;
+      System.setOut(out);
+      //table creation
       Table test = new Table();
       assert(test.getName().equals("untitled"));
       String testName = "test";
       Table test1 = new Table(testName);
       assert(test1.getName().equals(testName));
-      
+      //reset System.out
+      System.out.flush();
+      System.setOut(console);
    }
 
    void testTableManipulation() {
-
+      //redirect System.out
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      PrintStream out = new PrintStream(baos);
+      PrintStream console = System.out;
+      System.setOut(out);
+      //reset System.out
+      System.out.flush();
+      System.setOut(console);
    }
 
    void runTests() {
