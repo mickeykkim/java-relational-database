@@ -80,7 +80,6 @@ class Table {
       if (!checkRecordDataExists(idx)) return;
       if (!checkRecordInputSize(data)) return;
       this.records.add(idx, data);
-      delete(idx + 1);
    }
 
    void delete(int idx) {
@@ -119,10 +118,12 @@ class Table {
 
    void testTableManipulation() {
       //redirect System.out
+      /*
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       PrintStream out = new PrintStream(baos);
       PrintStream console = System.out;
       System.setOut(out);
+      */
       //Begin tests
       //checking add records
       Table test1 = new Table();
@@ -140,9 +141,9 @@ class Table {
       assert(caught == true);
       caught = false;
       //checking delete records
+      test1.delete(0);
       Record testR3 = new Record("q", "w", "e", "r");
       test1.add(testR3);
-      test1.delete(0);
       assert(test1.select(0).getField(0).equals("q"));
       assert(test1.select(0).getField(1).equals("w"));
       assert(test1.select(0).getField(2).equals("e"));
@@ -170,7 +171,7 @@ class Table {
       test1.add(testR1);
       test1.update(0, 0, "x");
       assert(test1.select(0).getField(0).equals("x"));
-      try { test1.update(1, 0, "x"); }
+      try { test1.update(2, 0, "x"); }
       catch (IndexOutOfBoundsException e) { caught = true; }
       assert(caught == true);
       caught = false;
@@ -179,8 +180,10 @@ class Table {
       assert(caught == true);
       caught = false;
       //reset System.out
+      /*
       System.out.flush();
       System.setOut(console);
+      */
    }
 
    void runTests() {
