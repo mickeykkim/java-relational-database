@@ -1,4 +1,4 @@
-For the first version of Record.java, I implemented the strings as a list. I chose to use a list rather than an array because databases have fields that can be changed often. Thus, a list makes more sense as items can be more efficiently added or deleted. This first version has a simple length query and get/set methods along with their respective helper functions (add and clear lists) with tests.
+For the first version of Record.java, I implemented the strings as a list. I chose to use a list rather than an array because databases have fields that can be changed often. Thus, a list makes more sense as items can be more efficiently added or deleted. This first version has a simple length query and get/set methods along with their respective helper methods (add and clear lists) with tests.
 
 Code is as follows:
 
