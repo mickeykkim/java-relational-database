@@ -60,6 +60,12 @@ class Record {
 
    // tests getField(int) setField(int, String)
    void getsetTests() {
+      //redirect System.out
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      PrintStream out = new PrintStream(baos);
+      PrintStream console = System.out;
+      System.setOut(out);
+      //Begin tests
       Record test = new Record();
       boolean caught = false;
       test.add("test1");
@@ -67,11 +73,6 @@ class Record {
       assert(test.getField(0).equals("test1"));
       assert(test.getField(1).equals("test2"));
       //out of bounds call
-      //redirect System.out
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      PrintStream out = new PrintStream(baos);
-      PrintStream console = System.out;
-      System.setOut(out);
       try { test.getField(2); } 
       catch (IndexOutOfBoundsException e) { caught = true; }
       assert(caught == true);
