@@ -1,0 +1,47 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.io.*;
+
+class File {
+   private static final String UNITDELIM = "\t";
+   private static final String RCRDDELIM = "\n";
+   private static final String EXTENSION = ".mdb";
+
+   private String fileName;
+   private String filePath;
+   private String dirPath;
+   private int lineCnt = 0;
+
+   File() {
+      this.fileName = "untitled" + EXTENSION;
+      this.filePath = "databases/" + this.fileName;
+      this.dirPath = "databases/";
+   }
+
+   File(String file) {
+      this.fileName = file + EXTENSION;
+      this.filePath = "databases/" + this.fileName;
+      this.dirPath = "databases/";
+   }
+
+   File(String folder, String file) {
+      if (!folder.endsWith("/")) {
+         folder = folder + "/";
+      }
+      this.fileName = file + EXTENSION;
+      this.filePath = folder + this.fileName;
+      this.dirPath = folder;
+   }
+
+   String getName() {
+      return this.fileName;
+   }
+
+   void writeToFile(String input) {
+
+   }
+
+   String writeTableToString(Table table) {
+      
+   }
+}

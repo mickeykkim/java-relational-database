@@ -1,4 +1,4 @@
-default: Record Table
+default: Record Table File
 
 %: %.java
 	javac $@.java

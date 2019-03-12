@@ -38,8 +38,16 @@ class Table {
       }
    }
 
+   int getColumnSize() {
+      return this.columns.size();
+   }
+
+   int getRecordSize() {
+      return this.records.size();
+   }
+
    String getColumnName(int idx) {
-      if (idx >= this.columns.size() || idx < 0) {
+      if (idx >= getColumnSize() || idx < 0) {
             System.out.println("No such column in table.");
             throw new IndexOutOfBoundsException();
       }
