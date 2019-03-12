@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
 import java.io.*;
 
 class File {
@@ -26,6 +24,7 @@ class File {
       StringBuilder output = new StringBuilder();
       int colsz = table.getColumnSize();
       int recsz = table.getRecordSize();
+      // table name
       output.append(table.getName() + RCRDDELIM);
       // columns
       for (int i = 0; i < colsz; i++) {
@@ -109,12 +108,13 @@ class File {
 
    void testFileParsing() {
       String testStr = "test";
-      boolean caught = false;
       File testFile = new File(testStr);
       Table testOut = new Table();
+      boolean caught = false;
       try { testOut = testFile.readFileToTable(testStr + EXTENSION); }
       catch (Exception e) { caught = true; }
       assert(caught == false);
+      assert(testFile.getName().equals(testStr + EXTENSION));
       String testInputFile = testFile.writeTableToString(testOut);
       assert(testInputFile.equals(
          testStr + RCRDDELIM +
