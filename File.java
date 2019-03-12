@@ -6,14 +6,29 @@ class File {
    private static final String EXTENSION = ".mdb";
 
    private String filename;
-   private int lineCnt;
+   private String filepath;
+   private String dirpath;
+   private int lineCnt = 0;
 
    File() {
       this.filename = "untitled" + EXTENSION;
+      this.filepath = "databases/" + this.filename;
+      this.dirpath = "databases/";
    }
 
    File(String file) {
       this.filename = file + EXTENSION;
+      this.filepath = "databases/" + this.filename;
+      this.dirpath = "databases/";
+   }
+
+   File(String folder, String file) {
+      if (!folder.endsWith("/")) {
+         folder = folder + "/";
+      }
+      this.filename = file + EXTENSION;
+      this.filepath = folder + this.filename;
+      this.dirpath = folder;
    }
 
    String getName() {
