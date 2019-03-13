@@ -97,6 +97,8 @@ class File {
       return outputTable;
    }
 
+   //--- testing ---
+
    void testFileCreation() {
       // make file objects
       File test0 = new File();

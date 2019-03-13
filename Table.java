@@ -74,6 +74,21 @@ class Table {
       this.records.add(data);
    }
 
+   void insert(int idx, Record data) {
+      if (!checkRecordDataExists(idx)) return;
+      if (!checkRecordInputSize(data)) return;
+      this.records.add(idx, data);
+   }
+
+   void delete(int idx) {
+      if (!checkRecordDataExists(idx)) return;
+      this.records.remove(idx);
+   }
+
+   void update(int idxRecord, int idxField, String data) {
+      select(idxRecord).setField(idxField, data);
+   }
+
    private boolean checkRecordDataExists(int idx) {
       if (idx >= this.records.size() || idx < 0) {
          System.out.println("No such record in table.");
@@ -88,21 +103,6 @@ class Table {
          throw new IllegalArgumentException();
       }
       return true;
-   }
-
-   void insert(int idx, Record data) {
-      if (!checkRecordDataExists(idx)) return;
-      if (!checkRecordInputSize(data)) return;
-      this.records.add(idx, data);
-   }
-
-   void delete(int idx) {
-      if (!checkRecordDataExists(idx)) return;
-      this.records.remove(idx);
-   }
-
-   void update(int idxRecord, int idxField, String data) {
-      select(idxRecord).setField(idxField, data);
    }
 
    //--- testing ---
