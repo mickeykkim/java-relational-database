@@ -143,6 +143,9 @@ class Print {
       assert(testPrint.generateHorizontalDivider(testTable).equals(
          "+----+-----+------+\n"
       ));
+      assert(testPrint.generateColumnsString(testTable).equals(
+         "| 1  | 2   | 3    |\n"
+      ));
       assert(testPrint.generateRecordString(testTable, 0).equals(
          "| a  | b   | c    |\n"
       ));
@@ -152,7 +155,15 @@ class Print {
       assert(testPrint.generateRecordString(testTable, 2).equals(
          "| gg | hh  | iiii |\n"
       ));
-      System.out.println(testPrint.printTableToString(testTable));
+      assert(testPrint.printTableToString(testTable).equals(
+         "+----+-----+------+\n" +
+         "| 1  | 2   | 3    |\n" +
+         "+----+-----+------+\n" +
+         "| a  | b   | c    |\n" +
+         "| dd | eee | fff  |\n" +
+         "| gg | hh  | iiii |\n" +
+         "+----+-----+------+\n"
+      ));
    }
 
    void runTests() {
