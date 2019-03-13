@@ -1,0 +1,169 @@
+For printing, I wanted the output to be similar to MariaDB. The major challenge in accomplishing this, at the basic level, is autosizing the width of columns based on the longest field in each column. To solve this, I created a colWidth field in the Print class as an array of integers which would hold the maximum size of each column. I then created some methods which would traverse along a Table's columns and records to find and set max values for colWidth based on the length of each field's string. Next, I decided that the Print methods would generate strings, formatted to create an ASCII grid like MariaDB outputs. The non-data characters of the grid were set as constant fields (for flexibility in changing them later). I also set some constants to determine the amount of empty space padding on the x-axis to the left and right of each field. I then created methods to generate the horizontal divider along with formatting the column names and record data to insert vertical bars between the fields. I initially had a separate method for both column names and record fields, but they were almost identical so I refactored them into the same method. If the column data is required, the method is sent a "-1" for int idxData. If the record data is required, integers of 0 or greater are sent. 
+
+The current code is as follows:
+
+import java.io.*;
+import java.math.*;
+
+class Print {
+   private int[] colWidth;
+
+   private static final String X_DIV = "+";
+   private static final String H_DIV = "-";
+   private static final String V_DIV = "|";
+   private static final String EMPTY = " ";
+   private static final String NEWLN = "\n";
+   private static final int XPADD = 2;
+   private static final int HPADD = XPADD/2;
+
+   Print() {
+      this.colWidth = new int[0];
+   }
+
+   // return a copy of the selected width
+   int getColWidth(int i) {
+      int ret = this.colWidth[i];
+      return ret;
+   }
+
+   // set initial column widths from column names
+   void setInitialWidths(Table inputTable, int colNum) {
+      this.colWidth = new int[colNum];
+      for (int i = 0; i < colNum; i++) {
+         this.colWidth[i] = inputTable.getColumnName(i).length();
+      }
+   }
+
+   // get max column widths from record fields
+   void setMaxWidths(Table inputTable) {
+      int colNum = inputTable.getColumnSize();
+      setInitialWidths(inputTable, colNum);
+      for (int i = 0; i < inputTable.getRecordSize(); i++) {
+         for (int j = 0; j < colNum; j++) {
+            this.colWidth[j] = 
+               Math.max(this.colWidth[j], inputTable.select(i).getField(j).length());
+         }
+      }
+   }
+
+   // Returns string like "+---+---+---+\n"
+   String generateHorizontalDivider(Table inputTable) {
+      int colsz = inputTable.getColumnSize();
+      StringBuilder horDivBuilder = new StringBuilder();
+      for (int i = 0; i < colsz; i++) {
+         horDivBuilder.append(X_DIV);
+         for (int j = 0; j < getColWidth(i) + XPADD; j++) {
+            horDivBuilder.append(H_DIV);
+         }
+      }
+      horDivBuilder.append(X_DIV);
+      horDivBuilder.append(NEWLN);
+      return horDivBuilder.toString();
+   }
+
+   // Returns string like "| data 1 | data 2 | data 3 |\n"
+   String generateDataString(Table inputTable, int idxData) {
+      int colsz = inputTable.getColumnSize();
+      if (idxData > colsz || idxData < -1) {
+         System.out.println("No such field in table.");
+         throw new IndexOutOfBoundsException();
+      }
+      StringBuilder dataBuilder = new StringBuilder();
+      String currField;
+      for (int i = 0; i < colsz; i++) {
+         if (idxData == -1) {
+            currField = inputTable.getColumnName(i);
+         } else {
+            currField = inputTable.select(idxData).getField(i);
+         }
+         dataBuilder.append(V_DIV);
+         dataBuilder.append(EMPTY);
+         dataBuilder.append(currField);
+         for (int j = 0; j < getColWidth(i) - currField.length() + HPADD; j++) {
+            dataBuilder.append(EMPTY);
+         }
+      }
+      dataBuilder.append(V_DIV);
+      dataBuilder.append(NEWLN);
+      return dataBuilder.toString();
+   }
+
+   // Returns string   +---+---+---+
+   // in the format:   | 1 | 2 | 3 |
+   //                  +---+---+---+
+   //                  | a | b | c |
+   //                  +---+---+---+
+   String printTableToString(Table inputTable) {
+      int colsz = inputTable.getColumnSize();
+      int recsz = inputTable.getRecordSize();
+      String horDiv = generateHorizontalDivider(inputTable);
+      StringBuilder tableStringBuilder = new StringBuilder();
+      tableStringBuilder.append(horDiv);
+      // i = -1 for column headers; i = 0..recsz for records
+      for (int i = -1; i < recsz; i++) {
+         tableStringBuilder.append(generateDataString(inputTable, i));
+         if (i == -1) {
+            tableStringBuilder.append(horDiv);
+         }
+      }
+      tableStringBuilder.append(horDiv);
+      return tableStringBuilder.toString();
+   }
+
+   // --- testing ---
+
+   void testPrintingMethods() {
+      Print testPrint = new Print();
+      String testStr = "test_table";
+      // make tables
+      Table testTable = new Table(testStr);
+      testTable.setColumnNames("1", "2", "3");
+      Record testR1 = new Record("a", "b", "c");
+      testTable.add(testR1);
+      Record testR2 = new Record("dd", "eee", "fff");
+      testTable.add(testR2);
+      Record testR3 = new Record("gg", "hh", "iiii");
+      testTable.add(testR3);
+      testPrint.setInitialWidths(testTable, testTable.getColumnSize());
+      assert(testPrint.getColWidth(0)==1);
+      assert(testPrint.getColWidth(1)==1);
+      assert(testPrint.getColWidth(2)==1);
+      testPrint.setMaxWidths(testTable);
+      assert(testPrint.getColWidth(0)==2);
+      assert(testPrint.getColWidth(1)==3);
+      assert(testPrint.getColWidth(2)==4);
+      assert(testPrint.generateHorizontalDivider(testTable).equals(
+         "+----+-----+------+\n"
+      ));
+      assert(testPrint.generateDataString(testTable, -1).equals(
+         "| 1  | 2   | 3    |\n"
+      ));
+      assert(testPrint.generateDataString(testTable, 0).equals(
+         "| a  | b   | c    |\n"
+      ));
+      assert(testPrint.generateDataString(testTable, 1).equals(
+         "| dd | eee | fff  |\n"
+      ));
+      assert(testPrint.generateDataString(testTable, 2).equals(
+         "| gg | hh  | iiii |\n"
+      ));
+      assert(testPrint.printTableToString(testTable).equals(
+         "+----+-----+------+\n" +
+         "| 1  | 2   | 3    |\n" +
+         "+----+-----+------+\n" +
+         "| a  | b   | c    |\n" +
+         "| dd | eee | fff  |\n" +
+         "| gg | hh  | iiii |\n" +
+         "+----+-----+------+\n"
+      ));
+   }
+
+   void runTests() {
+      testPrintingMethods();
+   }
+
+   public static void main(String[] args) {
+      Print program = new Print();
+      program.runTests();
+   }
+}
