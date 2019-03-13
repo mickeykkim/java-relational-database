@@ -57,44 +57,31 @@ class Print {
       return horDivBuilder.toString();
    }
 
-   // Returns string like "| column 1 | column 2 | column 3 |\n"
-   String generateColumnsString(Table inputTable) {
+   // Returns string like "| data 1 | data 2 | data 3 |\n"
+   String generateDataString(Table inputTable, int idxData) {
       int colsz = inputTable.getColumnSize();
-      StringBuilder columnsBuilder = new StringBuilder();
-      for (int i = 0; i < colsz; i++) {
-         String currName = inputTable.getColumnName(i);
-         columnsBuilder.append(V_DIV);
-         columnsBuilder.append(EMPTY);
-         columnsBuilder.append(currName);
-         for (int j = 0; j < getColWidth(i) - currName.length() + HPADD; j++) {
-            columnsBuilder.append(EMPTY);
-         }
-      }
-      columnsBuilder.append(V_DIV);
-      columnsBuilder.append(NEWLN);
-      return columnsBuilder.toString();
-   }
-
-   // Returns string like "| record 1 | record 2 | record 3 |\n"
-   String generateRecordString(Table inputTable, int recordNum) {
-      int colsz = inputTable.getColumnSize();
-      if (recordNum > colsz || recordNum < 0) {
-         System.out.println("No such field in record.");
+      if (idxData > colsz || idxData < -1) {
+         System.out.println("No such field in table.");
          throw new IndexOutOfBoundsException();
       }
-      StringBuilder recordsBuilder = new StringBuilder();
+      StringBuilder dataBuilder = new StringBuilder();
+      String currField;
       for (int i = 0; i < colsz; i++) {
-         String currField = inputTable.select(recordNum).getField(i);
-         recordsBuilder.append(V_DIV);
-         recordsBuilder.append(EMPTY);
-         recordsBuilder.append(currField);
+         if (idxData == -1) {
+            currField = inputTable.getColumnName(i);
+         } else {
+            currField = inputTable.select(idxData).getField(i);
+         }
+         dataBuilder.append(V_DIV);
+         dataBuilder.append(EMPTY);
+         dataBuilder.append(currField);
          for (int j = 0; j < getColWidth(i) - currField.length() + HPADD; j++) {
-            recordsBuilder.append(EMPTY);
+            dataBuilder.append(EMPTY);
          }
       }
-      recordsBuilder.append(V_DIV);
-      recordsBuilder.append(NEWLN);
-      return recordsBuilder.toString();
+      dataBuilder.append(V_DIV);
+      dataBuilder.append(NEWLN);
+      return dataBuilder.toString();
    }
 
    // Returns string   +---+---+---+
@@ -110,11 +97,9 @@ class Print {
       tableStringBuilder.append(horDiv);
       // i = -1 for column headers; i = 0..recsz for records
       for (int i = -1; i < recsz; i++) {
+         tableStringBuilder.append(generateDataString(inputTable, i));
          if (i == -1) {
-            tableStringBuilder.append(generateColumnsString(inputTable));
             tableStringBuilder.append(horDiv);
-         } else {
-            tableStringBuilder.append(generateRecordString(inputTable, i));
          }
       }
       tableStringBuilder.append(horDiv);
@@ -146,16 +131,16 @@ class Print {
       assert(testPrint.generateHorizontalDivider(testTable).equals(
          "+----+-----+------+\n"
       ));
-      assert(testPrint.generateColumnsString(testTable).equals(
+      assert(testPrint.generateDataString(testTable, -1).equals(
          "| 1  | 2   | 3    |\n"
       ));
-      assert(testPrint.generateRecordString(testTable, 0).equals(
+      assert(testPrint.generateDataString(testTable, 0).equals(
          "| a  | b   | c    |\n"
       ));
-      assert(testPrint.generateRecordString(testTable, 1).equals(
+      assert(testPrint.generateDataString(testTable, 1).equals(
          "| dd | eee | fff  |\n"
       ));
-      assert(testPrint.generateRecordString(testTable, 2).equals(
+      assert(testPrint.generateDataString(testTable, 2).equals(
          "| gg | hh  | iiii |\n"
       ));
       assert(testPrint.printTableToString(testTable).equals(
