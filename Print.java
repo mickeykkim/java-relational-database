@@ -58,6 +58,7 @@ class Print {
    }
 
    // Returns string like "| data 1 | data 2 | data 3 |\n"
+   // idxData = -1 for column headers; idxData >= 0 for records
    String generateDataString(Table inputTable, int idxData) {
       int colsz = inputTable.getColumnSize();
       if (idxData > colsz || idxData < -1) {
