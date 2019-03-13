@@ -3,6 +3,7 @@ import java.math.*;
 
 class Print {
    private int[] colWidth;
+
    private static final String X_DIV = "+";
    private static final String H_DIV = "-";
    private static final String V_DIV = "|";
@@ -96,9 +97,10 @@ class Print {
       return recordsBuilder.toString();
    }
 
-   //                  table_name:
    // Returns string   +---+---+---+
    // in the format:   | 1 | 2 | 3 |
+   //                  +---+---+---+
+   //                  | a | b | c |
    //                  +---+---+---+
    String printTableToString(Table inputTable) {
       int colsz = inputTable.getColumnSize();
@@ -106,12 +108,13 @@ class Print {
       String horDiv = generateHorizontalDivider(inputTable);
       StringBuilder tableStringBuilder = new StringBuilder();
       tableStringBuilder.append(horDiv);
-      for (int i = 0; i < recsz + 1; i++) {
-         if (i == 0) {
+      // i = -1 for column headers; i = 0..recsz for records
+      for (int i = -1; i < recsz; i++) {
+         if (i == -1) {
             tableStringBuilder.append(generateColumnsString(inputTable));
             tableStringBuilder.append(horDiv);
          } else {
-            tableStringBuilder.append(generateRecordString(inputTable, i - 1));
+            tableStringBuilder.append(generateRecordString(inputTable, i));
          }
       }
       tableStringBuilder.append(horDiv);
