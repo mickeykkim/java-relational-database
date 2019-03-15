@@ -1,28 +1,31 @@
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.io.*;
 
 class Table {
    private String name;
    private List<String> columns;
-   private List<Record> records;
+   private LinkedHashMap<String,Record> records;
+   private static final String noSuchRecord = "No such record exists in Table.";
+   private static final String duplicateKey = "Duplicate key exists in Table.";
 
    Table() {
       this.name = "untitled";
       this.columns = new ArrayList<String>();
-      this.records = new ArrayList<Record>();
+      this.records = new LinkedHashMap<String,Record>();
    }
 
    Table(String name) {
       this.name = name;
       this.columns = new ArrayList<String>();
-      this.records = new ArrayList<Record>();
+      this.records = new LinkedHashMap<String,Record>();
    }
 
    Table(String name, String... columns) {
       this.name = name;
       this.columns = new ArrayList<String>();
-      this.records = new ArrayList<Record>();
+      this.records = new LinkedHashMap<String,Record>();
       setColumnNames(columns);
    }
 
@@ -30,7 +33,6 @@ class Table {
       this.columns.clear();
       for (String entry : names) {
          this.columns.add(entry);
-         //System.out.println(entry);
       }
    }
 
@@ -43,10 +45,7 @@ class Table {
    }
 
    String getColumnName(int idx) {
-      if (idx >= getColumnSize() || idx < 0) {
-            System.out.println("No such column in table.");
-            throw new IndexOutOfBoundsException();
-      }
+      checkColumnExists(idx);
       return this.columns.get(idx);
    }
 
@@ -58,54 +57,70 @@ class Table {
       this.name = name;
    }
 
-   Record select(int rowNum) {
-      if (rowNum > records.size() || rowNum < 0) {
-         System.out.println("No such row in record.");
+   Record select(String key) {
+      if (!keyExists(key)) {
+         System.out.println(noSuchRecord);
+         return null;
+      }
+      return this.records.get(key);
+   }
+
+   void add(String key, Record data) {
+      if (keyExists(key)) {
+         System.out.println(duplicateKey);
+         return;
+      }
+      checkRecordInputSize(data);
+      this.records.put(key, data);
+   }
+
+   void insert(String key, Record data) {
+      if (!keyExists(key)) {
+         System.out.println(noSuchRecord);
+         return;
+      }
+      checkRecordInputSize(data);
+      this.records.put(key, data);
+   }
+
+   void delete(String key, Record data) {
+      if (!keyExists(key)) {
+         System.out.println(noSuchRecord);
+         return;
+      }
+      this.records.remove(key);
+   }
+
+   void update(String key, int idxField, String input) {
+      if (!keyExists(key)) {
+         System.out.println(noSuchRecord);
+         return;
+      }
+      select(key).setField(idxField, input);
+   }
+
+   private void checkColumnExists(int idx) {
+      if (idx >= this.columns.size() || idx < 0) {
+         System.out.println("No such data in table.");
          throw new IndexOutOfBoundsException();
       }
-      return this.records.get(rowNum);
    }
 
-   void add(Record data) {
-      if (data.size() != columns.size()) {
-         System.out.println("Input data does not match table columns.");
-         throw new IllegalArgumentException();
+   private boolean keyExists(String key) {
+      if (this.records.containsKey(key)) {
+         return true;
       }
-      this.records.add(data);
+      return false;
    }
 
-   void insert(int idx, Record data) {
-      if (!checkRecordDataExists(idx)) return;
-      if (!checkRecordInputSize(data)) return;
-      this.records.add(idx, data);
-   }
-
-   void delete(int idx) {
-      if (!checkRecordDataExists(idx)) return;
-      this.records.remove(idx);
-   }
-
-   void update(int idxRecord, int idxField, String data) {
-      select(idxRecord).setField(idxField, data);
-   }
-
-   private boolean checkRecordDataExists(int idx) {
-      if (idx >= this.records.size() || idx < 0) {
-         System.out.println("No such record in table.");
-         throw new IndexOutOfBoundsException();
-      }
-      return true;
-   }
-
-   private boolean checkRecordInputSize(Record data) {
+   private void checkRecordInputSize(Record data) {
       if (data.size() != this.columns.size()) {
          System.out.println("Input data does not match table columns.");
          throw new IllegalArgumentException();
       }
-      return true;
    }
 
-   //--- testing ---
+   // --- testing ---
 
    void testTableCreation() {
       //redirect System.out

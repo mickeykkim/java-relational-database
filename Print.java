@@ -1,6 +1,3 @@
-import java.io.*;
-import java.math.*;
-
 class Print {
    private int[] colWidth;
 
@@ -32,10 +29,10 @@ class Print {
 
    // get max column widths from record fields
    void setMaxWidths(Table inputTable) {
-      int colNum = inputTable.getColumnSize();
-      setInitialWidths(inputTable, colNum);
+      int colsz = inputTable.getColumnSize();
+      setInitialWidths(inputTable, colsz);
       for (int i = 0; i < inputTable.getRecordSize(); i++) {
-         for (int j = 0; j < colNum; j++) {
+         for (int j = 0; j < colsz; j++) {
             this.colWidth[j] = 
                Math.max(this.colWidth[j], inputTable.select(i).getField(j).length());
          }
@@ -44,9 +41,8 @@ class Print {
 
    // Returns string like "+---+---+---+\n"
    String generateHorizontalDivider(Table inputTable) {
-      int colsz = inputTable.getColumnSize();
       StringBuilder horDivBuilder = new StringBuilder();
-      for (int i = 0; i < colsz; i++) {
+      for (int i = 0; i < inputTable.getColumnSize(); i++) {
          horDivBuilder.append(X_DIV);
          for (int j = 0; j < getColWidth(i) + XPADD; j++) {
             horDivBuilder.append(H_DIV);
@@ -62,12 +58,12 @@ class Print {
    String generateDataString(Table inputTable, int idxData) {
       int colsz = inputTable.getColumnSize();
       if (idxData > colsz || idxData < -1) {
-         System.out.println("No such field in table.");
+         System.out.println("No such data in table.");
          throw new IndexOutOfBoundsException();
       }
       StringBuilder dataBuilder = new StringBuilder();
       String currField;
-      for (int i = 0; i < colsz; i++) {
+      for (int i = 0; i < inputTable.getColumnSize(); i++) {
          if (idxData == -1) {
             currField = inputTable.getColumnName(i);
          } else {
@@ -76,7 +72,8 @@ class Print {
          dataBuilder.append(V_DIV);
          dataBuilder.append(EMPTY);
          dataBuilder.append(currField);
-         for (int j = 0; j < getColWidth(i) - currField.length() + HPADD; j++) {
+         // fill right side of data with empty spaces
+         for (int j = 0; j < (getColWidth(i) - currField.length() + HPADD); j++) {
             dataBuilder.append(EMPTY);
          }
       }
@@ -89,15 +86,14 @@ class Print {
    // in the format:   | 1 | 2 | 3 |
    //                  +---+---+---+
    //                  | a | b | c |
+   //                  | x | y | z |
    //                  +---+---+---+
    String printTableToString(Table inputTable) {
-      int colsz = inputTable.getColumnSize();
-      int recsz = inputTable.getRecordSize();
       String horDiv = generateHorizontalDivider(inputTable);
       StringBuilder tableStringBuilder = new StringBuilder();
       tableStringBuilder.append(horDiv);
       // i = -1 for column headers; i = 0..recsz for records
-      for (int i = -1; i < recsz; i++) {
+      for (int i = -1; i < inputTable.getRecordSize(); i++) {
          tableStringBuilder.append(generateDataString(inputTable, i));
          if (i == -1) {
             tableStringBuilder.append(horDiv);
@@ -121,6 +117,7 @@ class Print {
       testTable.add(testR2);
       Record testR3 = new Record("gg", "hh", "iiii");
       testTable.add(testR3);
+      // set and test widths
       testPrint.setInitialWidths(testTable, testTable.getColumnSize());
       assert(testPrint.getColWidth(0)==1);
       assert(testPrint.getColWidth(1)==1);
@@ -129,6 +126,7 @@ class Print {
       assert(testPrint.getColWidth(0)==2);
       assert(testPrint.getColWidth(1)==3);
       assert(testPrint.getColWidth(2)==4);
+      // test sub strings
       assert(testPrint.generateHorizontalDivider(testTable).equals(
          "+----+-----+------+\n"
       ));
@@ -144,6 +142,7 @@ class Print {
       assert(testPrint.generateDataString(testTable, 2).equals(
          "| gg | hh  | iiii |\n"
       ));
+      // test full print
       assert(testPrint.printTableToString(testTable).equals(
          "+----+-----+------+\n" +
          "| 1  | 2   | 3    |\n" +

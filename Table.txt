@@ -11,6 +11,10 @@ class Table {
    private List<String> columns;
    private List<Record> records;
 
+   enum DataType{
+      RecordData, ColumnData
+   }
+
    Table() {
       this.name = "untitled";
       this.columns = new ArrayList<String>();
@@ -34,7 +38,6 @@ class Table {
       this.columns.clear();
       for (String entry : names) {
          this.columns.add(entry);
-         //System.out.println(entry);
       }
    }
 
@@ -47,10 +50,7 @@ class Table {
    }
 
    String getColumnName(int idx) {
-      if (idx >= getColumnSize() || idx < 0) {
-            System.out.println("No such column in table.");
-            throw new IndexOutOfBoundsException();
-      }
+      checkDataExists(Table.DataType.ColumnData, idx);
       return this.columns.get(idx);
    }
 
@@ -62,51 +62,49 @@ class Table {
       this.name = name;
    }
 
-   Record select(int rowNum) {
-      if (rowNum > records.size() || rowNum < 0) {
-         System.out.println("No such row in record.");
-         throw new IndexOutOfBoundsException();
-      }
-      return this.records.get(rowNum);
+   Record select(int idx) {
+      checkDataExists(Table.DataType.RecordData, idx);
+      return this.records.get(idx);
    }
 
    void add(Record data) {
-      if (data.size() != columns.size()) {
-         System.out.println("Input data does not match table columns.");
-         throw new IllegalArgumentException();
-      }
+      checkRecordInputSize(data);
       this.records.add(data);
    }
 
-   private boolean checkRecordDataExists(int idx) {
-      if (idx >= this.records.size() || idx < 0) {
-         System.out.println("No such record in table.");
-         throw new IndexOutOfBoundsException();
-      }
-      return true;
-   }
-
-   private boolean checkRecordInputSize(Record data) {
-      if (data.size() != this.columns.size()) {
-         System.out.println("Input data does not match table columns.");
-         throw new IllegalArgumentException();
-      }
-      return true;
-   }
-
    void insert(int idx, Record data) {
-      if (!checkRecordDataExists(idx)) return;
-      if (!checkRecordInputSize(data)) return;
+      checkDataExists(Table.DataType.RecordData, idx);
+      checkRecordInputSize(data);
       this.records.add(idx, data);
    }
 
    void delete(int idx) {
-      if (!checkRecordDataExists(idx)) return;
+      checkDataExists(Table.DataType.RecordData, idx);
       this.records.remove(idx);
    }
 
    void update(int idxRecord, int idxField, String data) {
       select(idxRecord).setField(idxField, data);
+   }
+
+   private void checkDataExists(Table.DataType dataType, int idx) {
+      int datasz = 0;
+      if (dataType == Table.DataType.RecordData) {
+         datasz = this.records.size();
+      } else if (dataType == Table.DataType.ColumnData) {
+         datasz = this.columns.size();
+      }
+      if (idx >= datasz || idx < 0) {
+         System.out.println("No such data in table.");
+         throw new IndexOutOfBoundsException();
+      }
+   }
+
+   private void checkRecordInputSize(Record data) {
+      if (data.size() != this.columns.size()) {
+         System.out.println("Input data does not match table columns.");
+         throw new IllegalArgumentException();
+      }
    }
 
    //--- testing ---

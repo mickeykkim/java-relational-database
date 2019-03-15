@@ -12,14 +12,14 @@ class File {
 
    File() {
       this.filename = "untitled" + EXTENSION;
-      this.filepath = "databases/" + this.filename;
-      this.dirpath = "databases/";
+      this.filepath = "/databases/" + this.filename;
+      this.dirpath = "/databases/";
    }
 
    File(String file) {
       this.filename = file + EXTENSION;
-      this.filepath = "databases/" + this.filename;
-      this.dirpath = "databases/";
+      this.filepath = "/databases/" + this.filename;
+      this.dirpath = "/databases/";
    }
 
    File(String folder, String file) {
@@ -39,9 +39,9 @@ class File {
       StringBuilder output = new StringBuilder();
       int colsz = table.getColumnSize();
       int recsz = table.getRecordSize();
-      // table name
+      // write table name
       output.append(table.getName() + RCRDDELIM);
-      // columns
+      // write columns
       for (int i = 0; i < colsz; i++) {
          output.append(table.getColumnName(i));
          if (i < colsz - 1) {
@@ -49,7 +49,7 @@ class File {
          }
       }
       output.append(RCRDDELIM);
-      // records
+      // write records
       for (int i = 0; i < recsz; i++) {
          for (int j = 0; j < colsz; j++) {
             output.append(table.select(i).getField(j));
@@ -63,7 +63,7 @@ class File {
    }
 
    void writeStringToFile(String input) {
-      try (PrintStream ps = new PrintStream(filename)) { 
+      try (PrintStream ps = new PrintStream(this.filename)) { 
          ps.print(input); 
       } catch (Exception e) {
          System.out.println(e.getMessage());
@@ -77,13 +77,14 @@ class File {
       Table outputTable = new Table();
       this.lineCnt = 0;
       while ((line = bReader.readLine()) != null) {
+         // read table name
          if (this.lineCnt == 0) {
             tableName = line;
-            this.lineCnt++;
+         // read columns
          } else if (this.lineCnt == 1) {
             String[] headers = line.split(UNITDELIM);
             outputTable = new Table(tableName, headers);
-            this.lineCnt++;
+         // read records
          } else {
             Record newRecord = new Record();
             String[] fields = line.split(UNITDELIM);
@@ -91,13 +92,14 @@ class File {
                newRecord.add(entry);
             }
             outputTable.add(newRecord);
-            this.lineCnt++;
          }
+         this.lineCnt++;
       }
+      bReader.close();
       return outputTable;
    }
 
-   //--- testing ---
+   // --- testing ---
 
    void testFileCreation() {
       // make file objects

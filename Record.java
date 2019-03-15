@@ -29,16 +29,20 @@ class Record {
    }
 
    String getField(int idx) {
-      if (idx >= this.row.size() || idx < 0) {
-         System.out.println("No such field in record.");
-         throw new IndexOutOfBoundsException();
-      }
+      checkRecordExists(idx);
       return this.row.get(idx);
    }
 
    void setField(int idx, String data) {
-      this.row.add(idx, data);
-      this.row.remove(idx + 1);
+      checkRecordExists(idx);
+      this.row.set(idx, data);
+   }
+
+   private void checkRecordExists(int idx) {
+      if (idx >= this.row.size() || idx < 0) {
+         System.out.println("No such field in record.");
+         throw new IndexOutOfBoundsException();
+      }
    }
 
    // ---  testing ---

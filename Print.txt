@@ -2,9 +2,6 @@ For printing, I wanted the output to be similar to MariaDB. The major challenge 
 
 The current code is as follows:
 
-import java.io.*;
-import java.math.*;
-
 class Print {
    private int[] colWidth;
 
