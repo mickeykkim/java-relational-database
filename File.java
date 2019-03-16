@@ -101,7 +101,7 @@ class File {
 
    // --- testing ---
 
-   void testFileCreation() {
+   private void testFileCreation() {
       // make file objects
       File test0 = new File();
       assert(test0.getName().equals("untitled" + EXTENSION));
@@ -125,7 +125,7 @@ class File {
       testFile.writeStringToFile(testOutputStr);
    }
 
-   void testFileParsing() {
+   private void testFileParsing() {
       String testStr = "test";
       File testFile = new File(testStr);
       Table testOut = new Table();

@@ -13,14 +13,37 @@ class Print {
       this.colWidth = new int[0];
    }
 
+   // Returns string   +---+---+---+
+   // in the format:   | 1 | 2 | 3 |
+   //                  +---+---+---+
+   //                  | a | b | c |
+   //                  | x | y | z |
+   //                  +---+---+---+
+   String printTableToString(Table inputTable) {
+      String horDiv = generateHorizontalDivider(inputTable);
+      StringBuilder tableStringBuilder = new StringBuilder();
+      tableStringBuilder.append(horDiv);
+      // i = -1 for column headers; i = 0..recsz for records
+      for (int i = -1; i < inputTable.getRecordSize(); i++) {
+         tableStringBuilder.append(generateDataString(inputTable, i));
+         if (i == -1) {
+            tableStringBuilder.append(horDiv);
+         }
+      }
+      tableStringBuilder.append(horDiv);
+      return tableStringBuilder.toString();
+   }
+
+   // --- helper methods ---
+
    // return a copy of the selected width
-   int getColWidth(int i) {
+   private int getColWidth(int i) {
       int ret = this.colWidth[i];
       return ret;
    }
 
    // set initial column widths from column names
-   void setInitialWidths(Table inputTable, int colNum) {
+   private void setInitialWidths(Table inputTable, int colNum) {
       this.colWidth = new int[colNum];
       for (int i = 0; i < colNum; i++) {
          this.colWidth[i] = inputTable.getColumnName(i).length();
@@ -28,7 +51,7 @@ class Print {
    }
 
    // get max column widths from record fields
-   void setMaxWidths(Table inputTable) {
+   private void setMaxWidths(Table inputTable) {
       int colsz = inputTable.getColumnSize();
       setInitialWidths(inputTable, colsz);
       for (int i = 0; i < inputTable.getRecordSize(); i++) {
@@ -40,7 +63,7 @@ class Print {
    }
 
    // Returns string like "+---+---+---+\n"
-   String generateHorizontalDivider(Table inputTable) {
+   private String generateHorizontalDivider(Table inputTable) {
       StringBuilder horDivBuilder = new StringBuilder();
       for (int i = 0; i < inputTable.getColumnSize(); i++) {
          horDivBuilder.append(X_DIV);
@@ -55,7 +78,7 @@ class Print {
 
    // Returns string like "| data 1 | data 2 | data 3 |\n"
    // idxData = -1 for column headers; idxData >= 0 for records
-   String generateDataString(Table inputTable, int idxData) {
+   private String generateDataString(Table inputTable, int idxData) {
       int colsz = inputTable.getColumnSize();
       if (idxData > colsz || idxData < -1) {
          System.out.println("No such data in table.");
@@ -82,30 +105,9 @@ class Print {
       return dataBuilder.toString();
    }
 
-   // Returns string   +---+---+---+
-   // in the format:   | 1 | 2 | 3 |
-   //                  +---+---+---+
-   //                  | a | b | c |
-   //                  | x | y | z |
-   //                  +---+---+---+
-   String printTableToString(Table inputTable) {
-      String horDiv = generateHorizontalDivider(inputTable);
-      StringBuilder tableStringBuilder = new StringBuilder();
-      tableStringBuilder.append(horDiv);
-      // i = -1 for column headers; i = 0..recsz for records
-      for (int i = -1; i < inputTable.getRecordSize(); i++) {
-         tableStringBuilder.append(generateDataString(inputTable, i));
-         if (i == -1) {
-            tableStringBuilder.append(horDiv);
-         }
-      }
-      tableStringBuilder.append(horDiv);
-      return tableStringBuilder.toString();
-   }
-
    // --- testing ---
 
-   void testPrintingMethods() {
+   private void testPrintingMethods() {
       Print testPrint = new Print();
       String testStr = "test_table";
       // make tables

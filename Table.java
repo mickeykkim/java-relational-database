@@ -1,37 +1,40 @@
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.io.*;
 
 class Table {
    private String name;
-   private List<String> columns;
+   private ArrayList<ColumnID> columns;
    private LinkedHashMap<String,Record> records;
-   private static final String noSuchRecord = "No such record exists in Table.";
-   private static final String duplicateKey = "Duplicate key exists in Table.";
+   private int keyColumn = -1;
+
+   private static final String noSuchRecord = "No such record exists in table.";
+   private static final String noSuchColumn = "No such column exists in table.";
+   private static final String duplicateKey = "Duplicate key exists in table.";
+   private static final String noKeySpecified = "No key specified in table.";
 
    Table() {
       this.name = "untitled";
-      this.columns = new ArrayList<String>();
+      this.columns = new ArrayList<ColumnID>();
       this.records = new LinkedHashMap<String,Record>();
    }
 
    Table(String name) {
       this.name = name;
-      this.columns = new ArrayList<String>();
+      this.columns = new ArrayList<ColumnID>();
       this.records = new LinkedHashMap<String,Record>();
    }
 
-   Table(String name, String... columns) {
+   Table(String name, ColumnID... columns) {
       this.name = name;
-      this.columns = new ArrayList<String>();
+      this.columns = new ArrayList<ColumnID>();
       this.records = new LinkedHashMap<String,Record>();
-      setColumnNames(columns);
+      setColumnIDs(columns);
    }
 
-   void setColumnNames(String... names) {
-      this.columns.clear();
-      for (String entry : names) {
+   void setColumnIDs(ColumnID... columns) {
+      checkIfUniqueKeyColumnExists(columns);
+      for (ColumnID entry : columns) {
          this.columns.add(entry);
       }
    }
@@ -45,8 +48,8 @@ class Table {
    }
 
    String getColumnName(int idx) {
-      checkColumnExists(idx);
-      return this.columns.get(idx);
+      checkIfColumnExists(idx);
+      return this.columns.get(idx).getName();
    }
 
    String getName() {
@@ -58,62 +61,76 @@ class Table {
    }
 
    Record select(String key) {
-      if (!keyExists(key)) {
-         System.out.println(noSuchRecord);
-         return null;
-      }
+      checkIfRecordExists(key);
       return this.records.get(key);
    }
 
-   void add(String key, Record data) {
-      if (keyExists(key)) {
-         System.out.println(duplicateKey);
-         return;
-      }
-      checkRecordInputSize(data);
+   void add(Record data) {
+      String key = data.getField(this.keyColumn);
+      checkIfRecordsMatchColumns(data);
+      checkIfDuplicateKey(key);
       this.records.put(key, data);
    }
 
-   void insert(String key, Record data) {
-      if (!keyExists(key)) {
-         System.out.println(noSuchRecord);
-         return;
-      }
-      checkRecordInputSize(data);
-      this.records.put(key, data);
+   //TO DO: check if trying to update key but key already exists
+   void update(String key, int idx, String input) {
+      checkIfRecordExists(key);
+      select(key).setField(idx, input);
    }
 
-   void delete(String key, Record data) {
-      if (!keyExists(key)) {
-         System.out.println(noSuchRecord);
-         return;
-      }
+   void delete(String key) {
+      checkIfRecordExists(key);
       this.records.remove(key);
    }
 
-   void update(String key, int idxField, String input) {
-      if (!keyExists(key)) {
-         System.out.println(noSuchRecord);
-         return;
+   // --- helper methods ---
+
+   private void checkIfUniqueKeyColumnExists(ColumnID... values) {
+      int colCnt = 0;
+      this.columns.clear();
+      for (ColumnID entry : values) {
+         if (entry.containsKeys() == true && this.keyColumn == -1) {
+            this.keyColumn = colCnt;
+         } else if (entry.containsKeys() == true && this.keyColumn != -1) {
+            this.columns.clear();
+            System.out.println(duplicateKey);
+            throw new IllegalArgumentException(); 
+         }
+         colCnt++;
       }
-      select(key).setField(idxField, input);
+      checkIfKeyColumnExists();
    }
 
-   private void checkColumnExists(int idx) {
+   private void checkIfKeyColumnExists() {
+      if (this.keyColumn == -1) {
+         this.columns.clear();
+         System.out.println(noKeySpecified);
+         throw new IllegalArgumentException(); 
+      }
+   }
+
+   private void checkIfColumnExists(int idx) {
       if (idx >= this.columns.size() || idx < 0) {
-         System.out.println("No such data in table.");
+         System.out.println(noSuchColumn);
          throw new IndexOutOfBoundsException();
       }
    }
 
-   private boolean keyExists(String key) {
-      if (this.records.containsKey(key)) {
-         return true;
+   private void checkIfRecordExists(String key) {
+      if (!this.records.containsKey(key)) {
+         System.out.println(noSuchRecord);
+         throw new IllegalArgumentException();
       }
-      return false;
    }
 
-   private void checkRecordInputSize(Record data) {
+   private void checkIfDuplicateKey(String key) {
+      if (this.records.containsKey(key)) {
+         System.out.println(duplicateKey);
+         throw new IllegalArgumentException();
+      }
+   }
+
+   private void checkIfRecordsMatchColumns(Record data) {
       if (data.size() != this.columns.size()) {
          System.out.println("Input data does not match table columns.");
          throw new IllegalArgumentException();
@@ -122,7 +139,7 @@ class Table {
 
    // --- testing ---
 
-   void testTableCreation() {
+   private void testTableCreation() {
       //redirect System.out
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       PrintStream out = new PrintStream(baos);
@@ -137,12 +154,22 @@ class Table {
       Table test0 = new Table(testName);
       assert(test0.getName().equals(testName));
       //checking column validity
-      test0.setColumnNames("1", "2", "3", "4");
-      assert(test0.getColumnName(0).equals("1"));
+      test0.setColumnIDs(
+         new ColumnID("key", true), 
+         new ColumnID("2", false), 
+         new ColumnID("3"), 
+         new ColumnID("4")
+      );
+      assert(test0.getColumnName(0).equals("key"));
       assert(test0.getColumnName(1).equals("2"));
       assert(test0.getColumnName(2).equals("3"));
       assert(test0.getColumnName(3).equals("4"));
-      Table test1 = new Table("title", "X", "Y", "Z");
+      Table test1 = new Table(
+         "title", 
+         new ColumnID("X", true), 
+         new ColumnID("Y", false), 
+         new ColumnID("Z")
+      );
       assert(test1.getColumnName(0).equals("X"));
       assert(test1.getColumnName(1).equals("Y"));
       assert(test1.getColumnName(2).equals("Z"));
@@ -151,7 +178,7 @@ class Table {
       System.setOut(console);
    }
 
-   void testTableManipulation() {
+   private void testTableManipulation() {
       //redirect System.out
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       PrintStream out = new PrintStream(baos);
@@ -160,13 +187,18 @@ class Table {
       //Begin tests
       //checking add records
       Table test1 = new Table();
-      test1.setColumnNames("1", "2", "3", "4");
-      Record testR1 = new Record("a", "b", "c", "d");
+      test1.setColumnIDs(
+         new ColumnID("key", true), 
+         new ColumnID("2", false), 
+         new ColumnID("3"), 
+         new ColumnID("4")
+      );
+      Record testR1 = new Record("key1", "b", "c", "d");
       test1.add(testR1);
-      assert(test1.select(0).getField(0).equals("a"));
-      assert(test1.select(0).getField(1).equals("b"));
-      assert(test1.select(0).getField(2).equals("c"));
-      assert(test1.select(0).getField(3).equals("d"));
+      assert(test1.select("key1").getField(0).equals("key1"));
+      assert(test1.select("key1").getField(1).equals("b"));
+      assert(test1.select("key1").getField(2).equals("c"));
+      assert(test1.select("key1").getField(3).equals("d"));
       Record testR2 = new Record("a", "b", "c");
       boolean caught = false;
       try { test1.add(testR2); } 
@@ -174,41 +206,27 @@ class Table {
       assert(caught == true);
       caught = false;
       //checking delete records
-      test1.delete(0);
-      Record testR3 = new Record("q", "w", "e", "r");
+      test1.delete("key1");
+      Record testR3 = new Record("key2", "w", "e", "r");
       test1.add(testR3);
-      assert(test1.select(0).getField(0).equals("q"));
-      assert(test1.select(0).getField(1).equals("w"));
-      assert(test1.select(0).getField(2).equals("e"));
-      assert(test1.select(0).getField(3).equals("r"));
-      test1.delete(0);
-      try { test1.delete(0); }
-      catch (IndexOutOfBoundsException e) { caught = true; }
-      assert(caught == true);
-      caught = false;
-      //checking insert records
-      test1.add(testR1);
-      test1.add(testR1);
-      test1.insert(1, testR3);
-      assert(test1.select(1).getField(0).equals("q"));
-      assert(test1.select(1).getField(1).equals("w"));
-      assert(test1.select(1).getField(2).equals("e"));
-      assert(test1.select(1).getField(3).equals("r"));
-      try { test1.insert(4, testR3); }
-      catch (IndexOutOfBoundsException e) { caught = true; }
+      assert(test1.select("key2").getField(0).equals("key2"));
+      assert(test1.select("key2").getField(1).equals("w"));
+      assert(test1.select("key2").getField(2).equals("e"));
+      assert(test1.select("key2").getField(3).equals("r"));
+      test1.delete("key2");
+      try { test1.delete("key2"); }
+      catch (IllegalArgumentException e) { caught = true; }
       assert(caught == true);
       caught = false;
       //checking update records
-      test1.delete(0);
-      test1.delete(0);
       test1.add(testR1);
-      test1.update(0, 0, "x");
-      assert(test1.select(0).getField(0).equals("x"));
-      try { test1.update(2, 0, "x"); }
-      catch (IndexOutOfBoundsException e) { caught = true; }
+      test1.update("key1", 0, "x");
+      assert(test1.select("key1").getField(0).equals("x"));
+      try { test1.update("b", 0, "x"); }
+      catch (IllegalArgumentException e) { caught = true; }
       assert(caught == true);
       caught = false;
-      try { test1.update(0, 4, "x"); }
+      try { test1.update("key1", 4, "x"); }
       catch (IndexOutOfBoundsException e) { caught = true; }
       assert(caught == true);
       caught = false;

@@ -1,4 +1,4 @@
-default: Record Table File Print
+default: Record ColumnID Table File Print
 
 %: %.java
 	javac $@.java

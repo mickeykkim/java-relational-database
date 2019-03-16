@@ -1,1 +1,64 @@
-Adding keys to records was an interesting challenge. At first, I thought that perhaps the Record class should be responsible for its own key. But the requirement that keys be unique to a table suggested that the key values should instead be handled by the Table class. I thought then that perhaps I should create a list of keys, but then how should the keys and the records be linked? Perhaps, instead, I could use a Linked Hash Map, with hash keys being record keys and hash values being records themselves. I could then have the keys be specified by the user, with the Table class handling validation. Unfortunately, hash maps don't extend collections, so the generic functions such as add broke. There were 5 methods that I then had to update: select, add, insert, delete, and update. This required heavy refactoring of the Table, File, and Print classes.
+Adding keys to records was an interesting challenge. At first, I thought that perhaps the Record class should be responsible for its own key. But the requirement that keys be unique to a table suggested that the key values should instead be handled by the Table class. I thought then that perhaps I should create a list of keys, but then how should the keys and the records be linked? Perhaps, instead, I could use a Linked Hash Map, with hash keys being record keys and hash values being records themselves. I could then have the keys be specified by the user, with the Table class handling validation. Unfortunately, hash maps don't extend collections, so the generic functions such as add() broke. Also, if Records are identified via keys instead of index, inserting records doesn't seem to make sense (and also not possible using a Linked Hash Map).
+
+Just how the keys should be specified was another challenge. It didn't seem very elegant for the user to have to specify what the key should be every time they want to add or update a record. In MariaDB, tables are first created with attributes and then populated with records that adhere to those attributes. I thought then that the columns in a table could hold data about the table's attributes, including which column holds the record keys. Thus, I decided to create a new class called ColumnID.java which would just have some basic information about what the column name is and whether or not it contains keys. I also considered the possibility of adding attribute types later, which would fit nicely somewhere in this class.
+
+Current ColumnID.java is as follows:
+
+class ColumnID {
+   private String name;
+   private boolean containsKeys;
+
+   ColumnID() {
+   }
+
+   ColumnID(String name) {
+      this.name = name;
+      this.containsKeys = false;
+   }
+
+   ColumnID(String name, boolean containsKeys) {
+      this.name = name;
+      this.containsKeys = containsKeys;
+   }
+
+   String getName() {
+      return this.name;
+   }
+
+   void setName(String name) {
+      this.name = name;
+   }
+
+   boolean containsKeys() {
+      boolean status = this.containsKeys;
+      return status;
+   }
+
+   void setKeyStatus(boolean status) {
+      this.containsKeys = status;
+   }
+
+   // --- testing ---
+
+   void testColumnCreation() {
+      String testStr = "test";
+      String newTest = "testkey";
+      ColumnID test0 = new ColumnID(testStr);
+      assert(test0.getName().equals(testStr));
+      assert(test0.containsKeys() == false);
+      ColumnID test1 = new ColumnID(newTest, true);
+      assert(test1.getName().equals(newTest));
+      assert(test1.containsKeys() == true);
+      test1.setKeyStatus(false);
+      assert(test1.containsKeys() == false);
+   }
+
+   void runTests() {
+      testColumnCreation();
+   }
+
+   public static void main(String[] args) {
+      ColumnID program = new ColumnID();
+      program.runTests();
+   }
+}

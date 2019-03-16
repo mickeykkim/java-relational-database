@@ -38,6 +38,8 @@ class Record {
       this.row.set(idx, data);
    }
 
+   // --- helper methods ---
+
    private void checkRecordExists(int idx) {
       if (idx >= this.row.size() || idx < 0) {
          System.out.println("No such field in record.");
@@ -48,7 +50,7 @@ class Record {
    // ---  testing ---
 
    // tests add(string), length(), and clear() methods
-   void basicTests() {
+   private void basicTests() {
       Record test = new Record();
       test.add("test1");
       test.add("test2");
@@ -59,7 +61,7 @@ class Record {
    }
 
    // tests getField(int) setField(int, String)
-   void getsetTests() {
+   private void getsetTests() {
       //redirect System.out
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       PrintStream out = new PrintStream(baos);
