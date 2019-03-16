@@ -83,9 +83,11 @@ class Table {
       return keyColumn;
    }
 
-   //TO DO: check if trying to update key but key already exists
    void update(String key, int idx, String input) {
       checkIfRecordExists(key);
+      if (idx == keyColumn) {
+         checkIfDuplicateKey(input);
+      }
       select(key).setField(idx, input);
    }
 

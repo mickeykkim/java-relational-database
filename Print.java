@@ -100,7 +100,7 @@ class Print {
          }
          dataBuilder.append(V_DIV + EMPTY + currField);
          // fill right side of data with empty spaces
-         for (int j = 0; j < (getColWidth(i) - currField.length() + HPADD); j++) {
+         for (int j = 0; j < getColWidth(i) - currField.length() + HPADD; j++) {
             dataBuilder.append(EMPTY);
          }
       }
