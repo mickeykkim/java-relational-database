@@ -77,8 +77,7 @@ class Print {
             horDivBuilder.append(H_DIV);
          }
       }
-      horDivBuilder.append(X_DIV);
-      horDivBuilder.append(NEWLN);
+      horDivBuilder.append(X_DIV + NEWLN);
       return horDivBuilder.toString();
    }
 
@@ -99,16 +98,13 @@ class Print {
          } else {
             currField = inputTable.select(recordKeys.get(idxData)).getField(i);
          }
-         dataBuilder.append(V_DIV);
-         dataBuilder.append(EMPTY);
-         dataBuilder.append(currField);
+         dataBuilder.append(V_DIV + EMPTY + currField);
          // fill right side of data with empty spaces
          for (int j = 0; j < (getColWidth(i) - currField.length() + HPADD); j++) {
             dataBuilder.append(EMPTY);
          }
       }
-      dataBuilder.append(V_DIV);
-      dataBuilder.append(NEWLN);
+      dataBuilder.append(V_DIV + NEWLN);
       return dataBuilder.toString();
    }
 
