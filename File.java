@@ -1,8 +1,10 @@
+import java.util.List;
 import java.io.*;
 
 class File {
    private static final String UNITDELIM = "\t";
    private static final String RCRDDELIM = "\n";
+   private static final String KEYATTRIB = "*";
    private static final String EXTENSION = ".mdb";
 
    private String filename;
@@ -37,29 +39,39 @@ class File {
 
    String writeTableToString(Table table) {
       StringBuilder output = new StringBuilder();
-      int colsz = table.getColumnSize();
-      int recsz = table.getRecordSize();
-      // write table name
       output.append(table.getName() + RCRDDELIM);
-      // write columns
+      writeColumns(table, output);
+      writeRecords(table, output);
+      return output.toString();
+   }
+
+   void writeColumns(Table table, StringBuilder output) {
+      int colsz = table.getColumnSize();
+      int keyColumn = table.getKeyColumn();
       for (int i = 0; i < colsz; i++) {
+         if (i == keyColumn) {
+               output.append(KEYATTRIB);
+         }
          output.append(table.getColumnName(i));
          if (i < colsz - 1) {
             output.append(UNITDELIM);
          }
       }
       output.append(RCRDDELIM);
-      // write records
-      for (int i = 0; i < recsz; i++) {
-         for (int j = 0; j < colsz; j++) {
-            output.append(table.select(i).getField(j));
-            if (j < colsz - 1) {
+   }
+
+   void writeRecords(Table table, StringBuilder output) {
+      int colsz = table.getColumnSize();
+      List<String> recordKeys = table.getKeyList();
+      for (String entry : recordKeys) {
+         for (int i = 0; i < colsz; i++) {
+            output.append(table.select(entry).getField(i));
+            if (i < colsz - 1) {
                output.append(UNITDELIM);
             }
          }
          output.append(RCRDDELIM);
       }
-      return output.toString();
    }
 
    void writeStringToFile(String input) {
@@ -72,31 +84,44 @@ class File {
 
    Table readFileToTable(String filepath) throws Exception {
       BufferedReader bReader = new BufferedReader(new FileReader(filepath));
-      String line; 
+      String line;
       String tableName = new String();
       Table outputTable = new Table();
       this.lineCnt = 0;
       while ((line = bReader.readLine()) != null) {
-         // read table name
          if (this.lineCnt == 0) {
             tableName = line;
-         // read columns
          } else if (this.lineCnt == 1) {
-            String[] headers = line.split(UNITDELIM);
-            outputTable = new Table(tableName, headers);
-         // read records
+            outputTable = readColumnsToTable(outputTable, line, tableName);
          } else {
-            Record newRecord = new Record();
-            String[] fields = line.split(UNITDELIM);
-            for (String entry : fields) {
-               newRecord.add(entry);
-            }
-            outputTable.add(newRecord);
+            readRecords(outputTable, line);
          }
          this.lineCnt++;
       }
       bReader.close();
       return outputTable;
+   }
+
+   Table readColumnsToTable(Table outputTable, String line, String tableName) {
+      String[] headers = line.split(UNITDELIM);
+      ColumnID[] columns = new ColumnID[headers.length];
+      for (int i = 0; i < headers.length; i++) {
+         if (headers[i].startsWith("*")) {
+            columns[i] = new ColumnID(headers[i].replace(KEYATTRIB, ""), true);
+         } else {
+            columns[i] = new ColumnID(headers[i], false);
+         }
+      }
+      return new Table(tableName, columns);
+   }
+
+   void readRecords(Table outputTable, String line) {
+      Record newRecord = new Record();
+      String[] fields = line.split(UNITDELIM);
+      for (String entry : fields) {
+         newRecord.add(entry);
+      }
+      outputTable.add(newRecord);
    }
 
    // --- testing ---
@@ -110,7 +135,11 @@ class File {
       assert(testFile.getName().equals(testStr + EXTENSION));
       // make tables
       Table testTable = new Table(testStr);
-      testTable.setColumnNames("1", "2", "3");
+      testTable.setColumnIDs(
+         new ColumnID("1", true), 
+         new ColumnID("2", false), 
+         new ColumnID("3")
+      );
       Record testR1 = new Record("a", "b", "c");
       testTable.add(testR1);
       Record testR2 = new Record("x", "y", "z");
@@ -118,7 +147,7 @@ class File {
       String testOutputStr = testFile.writeTableToString(testTable);
       assert(testOutputStr.equals(
          testStr + RCRDDELIM +
-         "1" + UNITDELIM + "2" + UNITDELIM + "3" + RCRDDELIM +
+         KEYATTRIB + "1" + UNITDELIM + "2" + UNITDELIM + "3" + RCRDDELIM +
          "a" + UNITDELIM + "b" + UNITDELIM + "c" + RCRDDELIM +
          "x" + UNITDELIM + "y" + UNITDELIM + "z" + RCRDDELIM
       ));
@@ -137,7 +166,7 @@ class File {
       String testInputFile = testFile.writeTableToString(testOut);
       assert(testInputFile.equals(
          testStr + RCRDDELIM +
-         "1" + UNITDELIM + "2" + UNITDELIM + "3" + RCRDDELIM +
+         KEYATTRIB + "1" + UNITDELIM + "2" + UNITDELIM + "3" + RCRDDELIM +
          "a" + UNITDELIM + "b" + UNITDELIM + "c" + RCRDDELIM +
          "x" + UNITDELIM + "y" + UNITDELIM + "z" + RCRDDELIM
       ));

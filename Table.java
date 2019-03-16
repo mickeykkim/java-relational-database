@@ -1,10 +1,11 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.LinkedHashMap;
 import java.io.*;
 
 class Table {
    private String name;
-   private ArrayList<ColumnID> columns;
+   private List<ColumnID> columns;
    private LinkedHashMap<String,Record> records;
    private int keyColumn = -1;
 
@@ -70,6 +71,16 @@ class Table {
       checkIfRecordsMatchColumns(data);
       checkIfDuplicateKey(key);
       this.records.put(key, data);
+   }
+
+   List<String> getKeyList(){
+      ArrayList<String> keys = new ArrayList<>(records.keySet());
+      return keys;
+   }
+
+   int getKeyColumn() {
+      int keyColumn = this.keyColumn;
+      return keyColumn;
    }
 
    //TO DO: check if trying to update key but key already exists
@@ -173,6 +184,13 @@ class Table {
       assert(test1.getColumnName(0).equals("X"));
       assert(test1.getColumnName(1).equals("Y"));
       assert(test1.getColumnName(2).equals("Z"));
+      Record testR1 = new Record("key1", "1", "1");
+      Record testR2 = new Record("key2", "1", "2");
+      test1.add(testR1);
+      test1.add(testR2);
+      List<String> keys = test1.getKeyList();
+      assert(keys.get(0).equals("key1"));
+      assert(keys.get(1).equals("key2"));
       //reset System.out
       System.out.flush();
       System.setOut(console);

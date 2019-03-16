@@ -1,3 +1,5 @@
+import java.util.List;
+
 class Print {
    private int[] colWidth;
 
@@ -54,10 +56,14 @@ class Print {
    private void setMaxWidths(Table inputTable) {
       int colsz = inputTable.getColumnSize();
       setInitialWidths(inputTable, colsz);
-      for (int i = 0; i < inputTable.getRecordSize(); i++) {
-         for (int j = 0; j < colsz; j++) {
-            this.colWidth[j] = 
-               Math.max(this.colWidth[j], inputTable.select(i).getField(j).length());
+      List<String> recordKeys = inputTable.getKeyList();
+      for (String entry : recordKeys) {
+         for (int i = 0; i < colsz; i++) {
+            this.colWidth[i] = 
+               Math.max(
+                  this.colWidth[i], 
+                  inputTable.select(entry).getField(i).length()
+               );
          }
       }
    }
@@ -86,11 +92,12 @@ class Print {
       }
       StringBuilder dataBuilder = new StringBuilder();
       String currField;
+      List<String> recordKeys = inputTable.getKeyList();
       for (int i = 0; i < inputTable.getColumnSize(); i++) {
          if (idxData == -1) {
             currField = inputTable.getColumnName(i);
          } else {
-            currField = inputTable.select(idxData).getField(i);
+            currField = inputTable.select(recordKeys.get(idxData)).getField(i);
          }
          dataBuilder.append(V_DIV);
          dataBuilder.append(EMPTY);
@@ -112,7 +119,11 @@ class Print {
       String testStr = "test_table";
       // make tables
       Table testTable = new Table(testStr);
-      testTable.setColumnNames("1", "2", "3");
+      testTable.setColumnIDs(
+         new ColumnID("1", true), 
+         new ColumnID("2", false), 
+         new ColumnID("3")
+      );
       Record testR1 = new Record("a", "b", "c");
       testTable.add(testR1);
       Record testR2 = new Record("dd", "eee", "fff");
