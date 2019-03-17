@@ -9,6 +9,7 @@ class Database {
    private LinkedHashMap<String,Table> tables;
 
    private static final String EXTENSION = ".dbf";
+   private static final String noSuchRecord = "No such table exists in database.";
    private static final String duplicateKey = "Duplicate table names in database.";
 
    Database() {
@@ -69,25 +70,25 @@ class Database {
       this.tables.put(key, table);
    }
 
-   Table getTable(String key) {
+   Table select(String key) {
+      checkIfTableExists(key);
       return this.tables.get(key);
-   }
-
-   void writeDatabaseToFile(Database data) {
-
-   }
-
-   Database readDatabaseFromFile(String filename){
-
    }
 
    // --- helper methods ---
 
-   private void testDatabaseCreation() {
-
+   private void checkIfTableExists(String key) {
+      if (!this.tables.containsKey(key)) {
+         System.out.println(noSuchTable);
+         throw new IllegalArgumentException();
+      }
    }
 
    // --- testing ---
+
+   private void testDatabaseCreation() {
+
+   }
 
    private void runTests() {
       testDatabaseCreation();

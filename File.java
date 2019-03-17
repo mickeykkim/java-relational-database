@@ -37,15 +37,25 @@ class File {
       return this.filename;
    }
 
+   void writeStringToFile(String input) {
+      try (PrintStream ps = new PrintStream(this.filename)) { 
+         ps.print(input); 
+      } catch (Exception e) {
+         System.out.println(e.getMessage());
+      }
+   }
+
+   // --- table handling ---
+
    String writeTableToString(Table table) {
       StringBuilder output = new StringBuilder();
       output.append(table.getName() + RCRDDELIM);
-      writeColumns(table, output);
-      writeRecords(table, output);
+      writeTableColumns(table, output);
+      writeTableRecords(table, output);
       return output.toString();
    }
 
-   void writeColumns(Table table, StringBuilder output) {
+   void writeTableColumns(Table table, StringBuilder output) {
       int colsz = table.getColumnSize();
       int keyColumn = table.getKeyColumn();
       for (int i = 0; i < colsz; i++) {
@@ -60,7 +70,7 @@ class File {
       output.append(RCRDDELIM);
    }
 
-   void writeRecords(Table table, StringBuilder output) {
+   void writeTableRecords(Table table, StringBuilder output) {
       int colsz = table.getColumnSize();
       List<String> recordKeys = table.getKeyList();
       for (String entry : recordKeys) {
@@ -71,14 +81,6 @@ class File {
             }
          }
          output.append(RCRDDELIM);
-      }
-   }
-
-   void writeStringToFile(String input) {
-      try (PrintStream ps = new PrintStream(this.filename)) { 
-         ps.print(input); 
-      } catch (Exception e) {
-         System.out.println(e.getMessage());
       }
    }
 
@@ -94,7 +96,7 @@ class File {
          } else if (this.lineCnt == 1) {
             outputTable = readColumnsToTable(outputTable, line, tableName);
          } else {
-            readRecords(outputTable, line);
+            readTableRecords(outputTable, line);
          }
          this.lineCnt++;
       }
@@ -115,7 +117,7 @@ class File {
       return new Table(tableName, columns);
    }
 
-   void readRecords(Table outputTable, String line) {
+   void readTableRecords(Table outputTable, String line) {
       Record newRecord = new Record();
       String[] fields = line.split(UNITDELIM);
       for (String entry : fields) {
@@ -124,9 +126,19 @@ class File {
       outputTable.add(newRecord);
    }
 
+   // --- database handling ---
+
+   void writeDatabaseToString(Database data) {
+
+   }
+
+   Database readDatabaseFromFile(String filename){
+
+   }
+
    // --- testing ---
 
-   private void testFileCreation() {
+   private void testTableFileCreation() {
       // make file objects
       File test0 = new File();
       assert(test0.getName().equals("untitled" + EXTENSION));
@@ -154,7 +166,7 @@ class File {
       testFile.writeStringToFile(testOutputStr);
    }
 
-   private void testFileParsing() {
+   private void testTableFileParsing() {
       String testStr = "test";
       File testFile = new File(testStr);
       Table testOut = new Table();
@@ -172,9 +184,19 @@ class File {
       ));
    }
 
+   private void testDatabaseFileCreation() {
+
+   }
+
+   private void testDatabaseFileParsing() {
+      
+   }
+
    private void runTests() {
-      testFileCreation();
-      testFileParsing();
+      testTableFileCreation();
+      testTableFileParsing();
+      testDatabaseFileCreation();
+      testDatabaseFileParsing();
    }
 
    public static void main(String[] args) {
