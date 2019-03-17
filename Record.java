@@ -107,13 +107,13 @@ class Record {
       System.setOut(console);
    }
 
-   void runTests(String[] args) {
+   private void runTests() {
       basicTests();
       getsetTests();
    }
 
    public static void main(String[] args) {
       Record program = new Record();
-      program.runTests(args);
+      program.runTests();
    }
 }

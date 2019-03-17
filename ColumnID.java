@@ -47,7 +47,7 @@ class ColumnID {
       assert(test1.containsKeys() == false);
    }
 
-   void runTests() {
+   private void runTests() {
       testColumnCreation();
    }
 

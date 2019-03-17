@@ -255,7 +255,7 @@ class Table {
       System.setOut(console);
    }
 
-   void runTests() {
+   private void runTests() {
       testTableCreation();
       testTableManipulation();
    }

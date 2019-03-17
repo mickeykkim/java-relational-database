@@ -1,0 +1,1 @@
+For Database organization, I created a file called Database.java which serves as a collection of tables along with information about the database's name and folder. I also included some methods to save a database and load one from a file.

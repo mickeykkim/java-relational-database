@@ -5,7 +5,7 @@ class File {
    private static final String UNITDELIM = "\t";
    private static final String RCRDDELIM = "\n";
    private static final String KEYATTRIB = "*";
-   private static final String EXTENSION = ".mdb";
+   private static final String EXTENSION = ".dbt";
 
    private String filename;
    private String filepath;
@@ -172,7 +172,7 @@ class File {
       ));
    }
 
-   void runTests() {
+   private void runTests() {
       testFileCreation();
       testFileParsing();
    }

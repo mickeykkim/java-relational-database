@@ -163,7 +163,7 @@ class Print {
       ));
    }
 
-   void runTests() {
+   private void runTests() {
       testPrintingMethods();
    }
 
