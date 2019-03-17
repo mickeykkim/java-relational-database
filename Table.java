@@ -61,21 +61,21 @@ class Table {
       this.name = name;
    }
 
-   Record select(String key) {
-      checkIfRecordExists(key);
-      return this.records.get(key);
+   Record select(String recordKey) {
+      checkIfRecordExists(recordKey);
+      return this.records.get(recordKey);
    }
 
    void add(Record data) {
-      String key = data.getField(this.keyColumn);
+      String recordKey = data.getField(this.keyColumn);
       checkIfRecordsMatchColumns(data);
-      checkIfDuplicateKey(key);
-      this.records.put(key, data);
+      checkIfDuplicateKey(recordKey);
+      this.records.put(recordKey, data);
    }
 
-   List<String> getKeyList(){
-      ArrayList<String> keys = new ArrayList<>(records.keySet());
-      return keys;
+   List<String> getKeyList() {
+      ArrayList<String> recordKeys = new ArrayList<>(records.keySet());
+      return recordKeys;
    }
 
    int getKeyColumn() {
@@ -83,17 +83,18 @@ class Table {
       return keyColumn;
    }
 
-   void update(String key, int idx, String input) {
-      checkIfRecordExists(key);
-      if (idx == keyColumn) {
+   void update(String recordKey, int idx, String input) {
+      checkIfRecordExists(recordKey);
+      checkIfColumnExists(idx);
+      if (idx == keyColumn && recordKey != input) {
          checkIfDuplicateKey(input);
       }
-      select(key).setField(idx, input);
+      select(recordKey).setField(idx, input);
    }
 
-   void delete(String key) {
-      checkIfRecordExists(key);
-      this.records.remove(key);
+   void delete(String recordKey) {
+      checkIfRecordExists(recordKey);
+      this.records.remove(recordKey);
    }
 
    // --- helper methods ---
@@ -129,15 +130,15 @@ class Table {
       }
    }
 
-   private void checkIfRecordExists(String key) {
-      if (!this.records.containsKey(key)) {
+   private void checkIfRecordExists(String recordKey) {
+      if (!this.records.containsKey(recordKey)) {
          System.out.println(noSuchRecord);
          throw new IllegalArgumentException();
       }
    }
 
-   private void checkIfDuplicateKey(String key) {
-      if (this.records.containsKey(key)) {
+   private void checkIfDuplicateKey(String recordKey) {
+      if (this.records.containsKey(recordKey)) {
          System.out.println(duplicateKey);
          throw new IllegalArgumentException();
       }
