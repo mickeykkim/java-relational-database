@@ -5,7 +5,7 @@ import java.io.*;
 
 class Database {
    private String name;
-   private String folder;
+   private String folder = "/databases/";
    private LinkedHashMap<String,Table> tables;
 
    private static final String noSuchTable = "No such table exists in database.";
@@ -14,13 +14,11 @@ class Database {
 
    Database() {
       this.name = "untitled";
-      this.folder = "databases";
       this.tables = new LinkedHashMap<String,Table>();
    }
 
    Database(String name) {
       this.name = name;
-      this.folder = "databases";
       this.tables = new LinkedHashMap<String,Table>();
    }
 

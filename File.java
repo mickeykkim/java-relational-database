@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 import java.io.*;
 import java.nio.file.Files;
@@ -32,11 +33,8 @@ class File {
    }
 
    File(String folder, String file) {
-      if (!folder.endsWith("/")) {
-         folder = folder + "/";
-      }
       this.filename = file + EXTENSION;
-      this.dirpath = USER_PATH + folder;
+      this.dirpath = USER_PATH + checkFolderFormatting(folder);
       this.filepath = this.dirpath + this.filename;
    }
 
@@ -48,35 +46,98 @@ class File {
       return this.filepath;
    }
 
-   void writeStringToFile(String input) {
+   void writeDatabaseToFiles(Database database) {
+      writeStringToFile(writeDatabaseInfoToString(database));
+      List<String> tableKeys = database.getKeyList();
+      for (String entry : tableKeys) {
+         File newTableFile = new File(database.getFolder(), entry);
+         newTableFile.writeTableToFile(database.select(entry));
+      }
+   }
+
+   void writeTableToFile(Table table) {
+      String input = writeTableToString(table);
+      writeStringToFile(input);
+   }
+
+   Database readFileToDatabase(String filename) throws Exception {
+      BufferedReader bReader = new BufferedReader(new FileReader(this.filepath));
+      String line;
+      Database outputDB = new Database();
+      this.lineCnt = 0;
+      while ((line = bReader.readLine()) != null) {
+         if (this.lineCnt == 0) {
+            outputDB.setName(line);
+         } else if (this.lineCnt == 1) {
+            outputDB.setFolder(line);
+         } else {
+            outputDB.add(readFileToTable(line));
+         }
+         this.lineCnt++;
+      }
+      bReader.close();
+      return outputDB;
+   }
+
+   Table readFileToTable(String filepath) throws Exception {
+      BufferedReader bReader = new BufferedReader(new FileReader(this.filepath));
+      String line;
+      String tableName = new String();
+      Table outputTable = new Table();
+      this.lineCnt = 0;
+      while ((line = bReader.readLine()) != null) {
+         if (this.lineCnt == 0) {
+            tableName = line;
+         } else if (this.lineCnt == 1) {
+            outputTable = readColumnsToTable(outputTable, line, tableName);
+         } else {
+            addTableRecords(outputTable, line);
+         }
+         this.lineCnt++;
+      }
+      bReader.close();
+      return outputTable;
+   }
+
+   // --- helper functions ---
+
+   private void writeStringToFile(String input) {
       Path path = Paths.get(this.dirpath);
       if (!Files.exists(path)) {
          try {
             Files.createDirectories(path); 
-         } 
-         catch (IOException e) {
+         } catch (IOException e) {
             e.printStackTrace(); 
          }
       }
       try {
          Files.write(Paths.get(this.filepath), input.getBytes(CENCODING)); 
-      }
-      catch (IOException e) {
+      } catch (IOException e) {
          e.printStackTrace(); 
       }
    }
 
+   private String checkFolderFormatting(String folder) {
+      if (!folder.startsWith("/")) {
+         folder = "/" + folder;
+      }
+      if (!folder.endsWith("/")) {
+         folder = folder + "/";
+      }
+      return folder;
+   }
+
    // --- table handling ---
 
-   String writeTableToString(Table table) {
+   private String writeTableToString(Table table) {
       StringBuilder output = new StringBuilder();
       output.append(table.getName() + RCRDDELIM);
-      writeTableColumns(table, output);
-      writeTableRecords(table, output);
+      appendTableColumns(table, output);
+      appendTableRecords(table, output);
       return output.toString();
    }
 
-   void writeTableColumns(Table table, StringBuilder output) {
+   private void appendTableColumns(Table table, StringBuilder output) {
       int colsz = table.getColumnSize();
       int keyColumn = table.getKeyColumn();
       for (int i = 0; i < colsz; i++) {
@@ -91,7 +152,7 @@ class File {
       output.append(RCRDDELIM);
    }
 
-   void writeTableRecords(Table table, StringBuilder output) {
+   private void appendTableRecords(Table table, StringBuilder output) {
       int colsz = table.getColumnSize();
       List<String> recordKeys = table.getKeyList();
       for (String entry : recordKeys) {
@@ -105,27 +166,7 @@ class File {
       }
    }
 
-   Table readFileToTable(String filepath) throws Exception {
-      BufferedReader bReader = new BufferedReader(new FileReader(filepath));
-      String line;
-      String tableName = new String();
-      Table outputTable = new Table();
-      this.lineCnt = 0;
-      while ((line = bReader.readLine()) != null) {
-         if (this.lineCnt == 0) {
-            tableName = line;
-         } else if (this.lineCnt == 1) {
-            outputTable = readColumnsToTable(outputTable, line, tableName);
-         } else {
-            readTableRecords(outputTable, line);
-         }
-         this.lineCnt++;
-      }
-      bReader.close();
-      return outputTable;
-   }
-
-   Table readColumnsToTable(Table outputTable, String line, String tableName) {
+   private Table readColumnsToTable(Table outputTable, String line, String tableName) {
       String[] headers = line.split(UNITDELIM);
       ColumnID[] columns = new ColumnID[headers.length];
       for (int i = 0; i < headers.length; i++) {
@@ -138,7 +179,7 @@ class File {
       return new Table(tableName, columns);
    }
 
-   void readTableRecords(Table outputTable, String line) {
+   private void addTableRecords(Table outputTable, String line) {
       Record newRecord = new Record();
       String[] fields = line.split(UNITDELIM);
       for (String entry : fields) {
@@ -148,15 +189,22 @@ class File {
    }
 
    // --- database handling ---
-   /*
-   void writeDatabaseToString(Database data) {
-
+   
+   private String writeDatabaseInfoToString(Database database) {
+      StringBuilder output = new StringBuilder();
+      output.append(database.getName() + EXTENSION + RCRDDELIM);
+      output.append(checkFolderFormatting(database.getFolder()) + RCRDDELIM);
+      appendDatabaseTableFilenames(database, output);
+      return output.toString();
    }
 
-   Database readDatabaseFromFile(String filename){
-
+   private void appendDatabaseTableFilenames(Database database, StringBuilder output) {
+      List<String> tableKeys = database.getKeyList();
+      for (String entry : tableKeys) {
+         output.append(entry + EXTENSION + RCRDDELIM);
+      }
    }
-   */
+
    // --- testing ---
 
    private void testTableFileCreation() {
@@ -201,8 +249,8 @@ class File {
          testStr + RCRDDELIM +
          KEYATTRIB + "1" + UNITDELIM + "2" + UNITDELIM + "3" + RCRDDELIM +
          "a" + UNITDELIM + "b" + UNITDELIM + "c" + RCRDDELIM +
-         "x" + UNITDELIM + "y" + UNITDELIM + "z" + RCRDDELIM
-      ));
+         "x" + UNITDELIM + "y" + UNITDELIM + "z" + RCRDDELIM)
+      );
    }
 
    private void testDatabaseFileCreation() {
@@ -240,10 +288,34 @@ class File {
       // add tables to database
       testDB.add(testTable1);
       testDB.add(testTable2);
+      // create File object
+      File testDBFile = new File(testFolderDB, testNameDB);
+      String testOutputDBStr = testDBFile.writeDatabaseInfoToString(testDB);
+      assert(testOutputDBStr.equals(
+         testNameDB + EXTENSION + RCRDDELIM +
+         checkFolderFormatting(testFolderDB) + RCRDDELIM +
+         testNameT1 + EXTENSION + RCRDDELIM +
+         testNameT2 + EXTENSION + RCRDDELIM)
+      );
+      testDBFile.writeDatabaseToFiles(testDB);
    }
 
    private void testDatabaseFileParsing() {
-
+      String testStr = "test";
+      File testFile = new File(testStr);
+      Table testOut = new Table();
+      boolean caught = false;
+      try { testOut = testFile.readFileToTable(this.dirpath + testStr + EXTENSION); }
+      catch (Exception e) { caught = true; }
+      assert(caught == false);
+      assert(testFile.getName().equals(testStr + EXTENSION));
+      String testInputFile = testFile.writeTableToString(testOut);
+      assert(testInputFile.equals(
+         testStr + RCRDDELIM +
+         KEYATTRIB + "1" + UNITDELIM + "2" + UNITDELIM + "3" + RCRDDELIM +
+         "a" + UNITDELIM + "b" + UNITDELIM + "c" + RCRDDELIM +
+         "x" + UNITDELIM + "y" + UNITDELIM + "z" + RCRDDELIM)
+      );
    }
 
    private void runTests() {
