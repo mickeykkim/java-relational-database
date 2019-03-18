@@ -8,7 +8,6 @@ class Database {
    private String folder;
    private LinkedHashMap<String,Table> tables;
 
-   private static final String EXTENSION = ".dbf";
    private static final String noSuchTable = "No such table exists in database.";
    private static final String duplicateKey = "Duplicate table names in database.";
    private static final String sizeMismatch = "Records are not the same size.";

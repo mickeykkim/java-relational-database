@@ -1,11 +1,18 @@
 import java.util.List;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 class File {
    private static final String UNITDELIM = "\t";
    private static final String RCRDDELIM = "\n";
    private static final String KEYATTRIB = "*";
-   private static final String EXTENSION = ".dbt";
+   private static final String EXTENSION = ".dbf";
+   private static final String DEF_FNAME = "untitled";
+   private static final String DEF_FPATH = "/databases/";
+   private static final String CENCODING = "UTF-8";
+   private static final String USER_PATH = System.getProperty("user.dir");
 
    private String filename;
    private String filepath;
@@ -13,15 +20,15 @@ class File {
    private int lineCnt = 0;
 
    File() {
-      this.filename = "untitled" + EXTENSION;
-      this.filepath = "/databases/" + this.filename;
-      this.dirpath = "/databases/";
+      this.filename = DEF_FNAME + EXTENSION;
+      this.dirpath = USER_PATH + DEF_FPATH;
+      this.filepath = this.dirpath + this.filename;
    }
 
    File(String file) {
       this.filename = file + EXTENSION;
-      this.filepath = "/databases/" + this.filename;
-      this.dirpath = "/databases/";
+      this.dirpath = USER_PATH + DEF_FPATH;
+      this.filepath = this.dirpath + this.filename;
    }
 
    File(String folder, String file) {
@@ -29,19 +36,33 @@ class File {
          folder = folder + "/";
       }
       this.filename = file + EXTENSION;
-      this.filepath = folder + this.filename;
-      this.dirpath = folder;
+      this.dirpath = USER_PATH + folder;
+      this.filepath = this.dirpath + this.filename;
    }
 
    String getName() {
       return this.filename;
    }
 
+   String getFilePath() {
+      return this.filepath;
+   }
+
    void writeStringToFile(String input) {
-      try (PrintStream ps = new PrintStream(this.filename)) { 
-         ps.print(input); 
-      } catch (Exception e) {
-         System.out.println(e.getMessage());
+      Path path = Paths.get(this.dirpath);
+      if (!Files.exists(path)) {
+         try {
+            Files.createDirectories(path); 
+         } 
+         catch (IOException e) {
+            e.printStackTrace(); 
+         }
+      }
+      try {
+         Files.write(Paths.get(this.filepath), input.getBytes(CENCODING)); 
+      }
+      catch (IOException e) {
+         e.printStackTrace(); 
       }
    }
 
@@ -127,7 +148,7 @@ class File {
    }
 
    // --- database handling ---
-
+   /*
    void writeDatabaseToString(Database data) {
 
    }
@@ -135,7 +156,7 @@ class File {
    Database readDatabaseFromFile(String filename){
 
    }
-
+   */
    // --- testing ---
 
    private void testTableFileCreation() {
@@ -171,7 +192,7 @@ class File {
       File testFile = new File(testStr);
       Table testOut = new Table();
       boolean caught = false;
-      try { testOut = testFile.readFileToTable(testStr + EXTENSION); }
+      try { testOut = testFile.readFileToTable(this.dirpath + testStr + EXTENSION); }
       catch (Exception e) { caught = true; }
       assert(caught == false);
       assert(testFile.getName().equals(testStr + EXTENSION));
@@ -185,11 +206,44 @@ class File {
    }
 
    private void testDatabaseFileCreation() {
-
+      // Begin tests
+      // create database
+      Database testDB = new Database();   
+      String testNameDB = "test_database";
+      testDB.setName(testNameDB);
+      String testFolderDB = "test_folder";
+      testDB.setFolder(testFolderDB);
+      // create table1
+      String testNameT1 = "test_table1";
+      Table testTable1 = new Table(
+         testNameT1, 
+         new ColumnID("key", true), 
+         new ColumnID("2", false), 
+         new ColumnID("3")
+      );
+      Record testT1R1 = new Record("key1", "1", "1");
+      Record testT1R2 = new Record("key2", "1", "2");
+      testTable1.add(testT1R1);
+      testTable1.add(testT1R2);
+      // create table2
+      String testNameT2 = "test_table2";
+      Table testTable2 = new Table(
+         testNameT2, 
+         new ColumnID("key", true), 
+         new ColumnID("2", false), 
+         new ColumnID("3")
+      );
+      Record testT2R1 = new Record("key1", "1", "1");
+      Record testT2R2 = new Record("key2", "1", "2");
+      testTable2.add(testT2R1);
+      testTable2.add(testT2R2);
+      // add tables to database
+      testDB.add(testTable1);
+      testDB.add(testTable2);
    }
 
    private void testDatabaseFileParsing() {
-      
+
    }
 
    private void runTests() {
