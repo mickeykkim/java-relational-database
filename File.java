@@ -195,11 +195,11 @@ class File {
       StringBuilder output = new StringBuilder();
       output.append(database.getName() + EXTENSION + RCRDDELIM);
       output.append(checkFolderFormatting(database.getFolder()) + RCRDDELIM);
-      appendDatabaseTableFilenames(database, output);
+      appendDatabaseTables(database, output);
       return output.toString();
    }
 
-   private void appendDatabaseTableFilenames(Database database, StringBuilder output) {
+   private void appendDatabaseTables(Database database, StringBuilder output) {
       List<String> tableKeys = database.getKeyList();
       for (String entry : tableKeys) {
          output.append(entry + EXTENSION + RCRDDELIM);

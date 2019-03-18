@@ -1,6 +1,6 @@
 For Database organization, I created a file called Database.java which serves as a collection of tables along with information about the database's name and folder. 
 
-Current version of Database.txt is as follows: 
+Current version of Database.java is as follows: 
 
 import java.util.ArrayList;
 import java.util.List;
