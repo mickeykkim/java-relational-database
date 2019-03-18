@@ -47,7 +47,8 @@ class File {
    }
 
    void writeDatabaseToFiles(Database database) {
-      writeStringToFile(writeDatabaseInfoToString(database));
+      String databaseInfo = writeDatabaseInfoToString(database);
+      writeStringToFile(databaseInfo);
       List<String> tableKeys = database.getKeyList();
       for (String entry : tableKeys) {
          File newTableFile = new File(database.getFolder(), entry);
@@ -56,8 +57,8 @@ class File {
    }
 
    void writeTableToFile(Table table) {
-      String input = writeTableToString(table);
-      writeStringToFile(input);
+      String tableString = writeTableToString(table);
+      writeStringToFile(tableString);
    }
 
    Database readFileToDatabase(String filename) throws Exception {
@@ -71,7 +72,7 @@ class File {
          } else if (this.lineCnt == 1) {
             outputDB.setFolder(line);
          } else {
-            outputDB.add(readFileToTable(line));
+            outputDB.add(readFileToTable(this.dirpath + line));
          }
          this.lineCnt++;
       }
@@ -80,7 +81,7 @@ class File {
    }
 
    Table readFileToTable(String filepath) throws Exception {
-      BufferedReader bReader = new BufferedReader(new FileReader(this.filepath));
+      BufferedReader bReader = new BufferedReader(new FileReader(filepath));
       String line;
       String tableName = new String();
       Table outputTable = new Table();
@@ -254,7 +255,6 @@ class File {
    }
 
    private void testDatabaseFileCreation() {
-      // Begin tests
       // create database
       Database testDB = new Database();   
       String testNameDB = "test_database";
@@ -301,21 +301,46 @@ class File {
    }
 
    private void testDatabaseFileParsing() {
-      String testStr = "test";
-      File testFile = new File(testStr);
-      Table testOut = new Table();
-      boolean caught = false;
-      try { testOut = testFile.readFileToTable(this.dirpath + testStr + EXTENSION); }
-      catch (Exception e) { caught = true; }
-      assert(caught == false);
-      assert(testFile.getName().equals(testStr + EXTENSION));
-      String testInputFile = testFile.writeTableToString(testOut);
-      assert(testInputFile.equals(
-         testStr + RCRDDELIM +
-         KEYATTRIB + "1" + UNITDELIM + "2" + UNITDELIM + "3" + RCRDDELIM +
-         "a" + UNITDELIM + "b" + UNITDELIM + "c" + RCRDDELIM +
-         "x" + UNITDELIM + "y" + UNITDELIM + "z" + RCRDDELIM)
+      // create database
+      Database testDB = new Database();   
+      String testNameDB = "test_database";
+      testDB.setName(testNameDB);
+      String testFolderDB = "test_folder";
+      testDB.setFolder(testFolderDB);
+      // create table1
+      String testNameT1 = "test_table1";
+      Table testTable1 = new Table(
+         testNameT1, 
+         new ColumnID("key", true), 
+         new ColumnID("2", false), 
+         new ColumnID("3")
       );
+      Record testT1R1 = new Record("key1", "1", "1");
+      Record testT1R2 = new Record("key2", "1", "2");
+      testTable1.add(testT1R1);
+      testTable1.add(testT1R2);
+      // create table2
+      String testNameT2 = "test_table2";
+      Table testTable2 = new Table(
+         testNameT2, 
+         new ColumnID("key", true), 
+         new ColumnID("2", false), 
+         new ColumnID("3")
+      );
+      Record testT2R1 = new Record("key1", "1", "1");
+      Record testT2R2 = new Record("key2", "1", "2");
+      testTable2.add(testT2R1);
+      testTable2.add(testT2R2);
+      // add tables to database
+      testDB.add(testTable1);
+      testDB.add(testTable2);
+      // create File object
+      File testDBFile = new File(testFolderDB, testNameDB);
+      Database testOutDB = new Database();
+      boolean caught = false;
+      try { testOutDB = testDBFile.readFileToDatabase(this.filepath); }
+      catch (Exception e) { caught = true; e.printStackTrace(); }
+      assert(caught == false);
    }
 
    private void runTests() {
