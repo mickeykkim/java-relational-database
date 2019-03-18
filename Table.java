@@ -1,3 +1,17 @@
+/* This class handles tables in a database with a header consisting of objects 
+ * described by ColumnID.java which holds basic information about the contents
+ * of each column, such as whether that column holds primary keys for the table.
+ * The table also holds records as data objects described by Record.java. The 
+ * table stores its own name as a private field, and has a keyColumn private
+ * field which stores the key column (as determined by the user upon creation
+ * of the column headers). Records exist as a LinkedHashMap, with keys
+ * automatically generated via helper functions upon adding records as HashMap 
+ * values to the Table. Tables can be constructed with a name and column data, 
+ * but in their absense, the table is named "untitled" and columns are empty.
+ * Records can be updated using this class. In the case that key values are
+ * updated, validation for unique record keys occur in this class.
+ */
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedHashMap;
@@ -137,6 +151,7 @@ class Table {
       }
    }
 
+   // TODO: refactor this as it's too similar to checkIfRecordExists()
    private void checkIfDuplicateKey(String recordKey) {
       if (this.records.containsKey(recordKey)) {
          System.out.println(duplicateKey);

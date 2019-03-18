@@ -1,3 +1,9 @@
+/* This is a simple class to represent column data. Columns consist of names
+ * and a boolean indicating whether that column contains the key for the table.
+ * Appropriate get and set methods are implemented. It is the responsibility
+ * of the Table class to validate unique keys among columns.
+ */
+
 class ColumnID {
    private String name;
    private boolean containsKeys;

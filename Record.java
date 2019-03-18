@@ -1,3 +1,11 @@
+/* This class holds a list of strings that represent data for a record, or row,
+ * in a database. Records are implemented in a List data type, and individual
+ * field data is accessed by getField and setField methods (validated using 
+ * a helper function to check if the field exists). The record object is 
+ * initialized either without arguments or by passing in strings using varargs.
+ * Add and clear methods are also implemented for manual data creation. 
+ */
+
 import java.util.ArrayList;
 import java.util.List;
 import java.io.*;

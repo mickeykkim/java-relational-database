@@ -1,3 +1,12 @@
+/* This class handles database data, including database name, folder, and
+ * tables. Database folders can be passed to the File class for file handling.
+ * Tables are implemented using a LinkedHashMap with the table name being the
+ * key (tables thus must have unique names). This is validated using helper 
+ * methods which check for unique table names upon creation and adding. Tables
+ * can be updated with new records, with unique record keys validated by the 
+ * Table class.
+ */
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedHashMap;

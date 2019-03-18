@@ -1,3 +1,10 @@
+/* This method prints tables in the style of MariaDB. Column widths are 
+ * automatically generated through helper functions which scan all column and
+ * record data for longest length. There are also helper methods to generate
+ * a horizontal divider and to format column/record data into appropriately
+ * width-adjusted strings.
+ */
+
 import java.util.List;
 
 class Print {
