@@ -94,7 +94,7 @@ class File {
       this.lineCnt = 0;
       while ((line = bReader.readLine()) != null) {
          if (this.lineCnt == 0) {
-            outputDB.setName(line);
+            outputDB.setName(removeExtensionFromString(line));
          } else if (this.lineCnt == 1) {
             outputDB.setFolder(line);
          } else {
@@ -128,6 +128,13 @@ class File {
    }
 
    // --- helper functions ---
+
+   private String removeExtensionFromString(String str) {
+      if (str != null && str.contains(".")) {
+         return str.substring(0, str.lastIndexOf('.'));
+      }
+      return str;
+   }
 
    private void writeStringToFile(String input) {
       Path path = Paths.get(this.dirpath);
@@ -238,10 +245,10 @@ class File {
    private void testTableFileCreation() {
       // make file objects
       File test0 = new File();
-      assert(test0.getName().equals("untitled" + EXTENSION));
+      assert(test0.getFileName().equals("untitled" + EXTENSION));
       String testStr = "test";
       File testFile = new File(testStr);
-      assert(testFile.getName().equals(testStr + EXTENSION));
+      assert(testFile.getFileName().equals(testStr + EXTENSION));
       // make tables
       Table testTable = new Table(testStr);
       testTable.setColumnIDs(
@@ -271,7 +278,7 @@ class File {
       try { testOut = testFile.readFileToTable(this.dirpath + testStr + EXTENSION); }
       catch (Exception e) { caught = true; }
       assert(caught == false);
-      assert(testFile.getName().equals(testStr + EXTENSION));
+      assert(testFile.getFileName().equals(testStr + EXTENSION));
       String testInputFile = testFile.writeTableToString(testOut);
       assert(testInputFile.equals(
          testStr + RCRDDELIM +
@@ -363,11 +370,16 @@ class File {
       testDB.add(testTable2);
       // create File object
       File testDBFile = new File(testNameDB, testFolderDB);
-      Database testOutDB = new Database();
+      Database testOutDB = new Database(testNameDB, testFolderDB);
       boolean caught = false;
       try { testOutDB = testDBFile.readDatabaseFiles(); }
       catch (Exception e) { caught = true; e.printStackTrace(); }
       assert(caught == false);
+      // check new database object
+      assert(testOutDB.getName().equals(testNameDB));
+      assert(testOutDB.getFolder().equals(checkFolderFormatting(testFolderDB)));
+      assert(testOutDB.select(testNameT1).select("key1").getField(1).equals("1"));
+      assert(testOutDB.select(testNameT2).select("key2").getField(2).equals("2"));
    }
 
    private void runTests() {
